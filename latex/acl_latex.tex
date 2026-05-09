@@ -1,376 +1,497 @@
 \documentclass[11pt]{article}
+\usepackage{amsmath}
 
-% Change "review" to "final" to generate the final (sometimes called camera-ready) version.
-% Change to "preprint" to generate a non-anonymous version with page numbers.
+% Class-project draft. Use [review] for anonymous submission.
 \usepackage[review]{acl}
 
-% Standard package includes
 \usepackage{times}
 \usepackage{latexsym}
-
-% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
 \usepackage[T1]{fontenc}
-% For Vietnamese characters
-% \usepackage[T5]{fontenc}
-% See https://www.latex-project.org/help/documentation/encguide.pdf for other character sets
-
-% This assumes your files are encoded as UTF8
 \usepackage[utf8]{inputenc}
-
-% This is not strictly necessary, and may be commented out,
-% but it will improve the layout of the manuscript,
-% and will typically save some space.
 \usepackage{microtype}
-
-% This is also not strictly necessary, and may be commented out.
-% However, it will improve the aesthetics of text in
-% the typewriter font.
 \usepackage{inconsolata}
-
-%Including images in your LaTeX document requires adding
-%additional package(s)
 \usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{enumitem}
 
-% If the title and author information does not fit in the area allocated, uncomment the following
-%
-%\setlength\titlebox{<dim>}
-%
-% and set <dim> to something 5cm or larger.
+\title{Paper2Repro: Rubrics, Tests, and Runtime — Execution-Grounded Paper to Code Reproduction}
 
-\title{Instructions for *ACL Proceedings}
-
-% Author information can be set in various styles:
-% For several authors from the same institution:
-% \author{Author 1 \and ... \and Author n \\
-%         Address line \\ ... \\ Address line}
-% if the names do not fit well on one line use
-%         Author 1 \\ {\bf Author 2} \\ ... \\ {\bf Author n} \\
-% For authors from different institutions:
-% \author{Author 1 \\ Address line \\  ... \\ Address line
-%         \And  ... \And
-%         Author n \\ Address line \\ ... \\ Address line}
-% To start a separate ``row'' of authors use \AND, as in
-% \author{Author 1 \\ Address line \\  ... \\ Address line
-%         \AND
-%         Author 2 \\ Address line \\ ... \\ Address line \And
-%         Author 3 \\ Address line \\ ... \\ Address line}
-
-\author{First Author \\
+\author{Yanting Chi \\
+  University of Minnesota \\
+  \texttt{chi00068@umn.edu} \\\And
+  Dongyeop Kang \\
   Affiliation / Address line 1 \\
   Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
-  \texttt{email@domain} \\\And
-  Second Author \\
-  Affiliation / Address line 1 \\
-  Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
   \texttt{email@domain} \\}
-
-%\author{
-%  \textbf{First Author\textsuperscript{1}},
-%  \textbf{Second Author\textsuperscript{1,2}},
-%  \textbf{Third T. Author\textsuperscript{1}},
-%  \textbf{Fourth Author\textsuperscript{1}},
-%\\
-%  \textbf{Fifth Author\textsuperscript{1,2}},
-%  \textbf{Sixth Author\textsuperscript{1}},
-%  \textbf{Seventh Author\textsuperscript{1}},
-%  \textbf{Eighth Author \textsuperscript{1,2,3,4}},
-%\\
-%  \textbf{Ninth Author\textsuperscript{1}},
-%  \textbf{Tenth Author\textsuperscript{1}},
-%  \textbf{Eleventh E. Author\textsuperscript{1,2,3,4,5}},
-%  \textbf{Twelfth Author\textsuperscript{1}},
-%\\
-%  \textbf{Thirteenth Author\textsuperscript{3}},
-%  \textbf{Fourteenth F. Author\textsuperscript{2,4}},
-%  \textbf{Fifteenth Author\textsuperscript{1}},
-%  \textbf{Sixteenth Author\textsuperscript{1}},
-%\\
-%  \textbf{Seventeenth S. Author\textsuperscript{4,5}},
-%  \textbf{Eighteenth Author\textsuperscript{3,4}},
-%  \textbf{Nineteenth N. Author\textsuperscript{2,5}},
-%  \textbf{Twentieth Author\textsuperscript{1}}
-%\\
-%\\
-%  \textsuperscript{1}Affiliation 1,
-%  \textsuperscript{2}Affiliation 2,
-%  \textsuperscript{3}Affiliation 3,
-%  \textsuperscript{4}Affiliation 4,
-%  \textsuperscript{5}Affiliation 5
-%\\
-%  \small{
-%    \textbf{Correspondence:} \href{mailto:email@domain}{email@domain}
-%  }
-%}
 
 \begin{document}
 \maketitle
+
 \begin{abstract}
-This document is a supplement to the general instructions for *ACL authors. It contains instructions for using the \LaTeX{} style files for ACL conferences.
-The document itself conforms to its own specifications, and is therefore an example of what your manuscript should look like.
-These instructions should be used both for papers submitted for review and for final versions of accepted papers.
+Automatic Generation of executable code from scientific papers is crutial
+for both research aim and the practical adoption of
+new methods in industry. Existing Paper to Code agents can produce
+repositories that appear faithful and may score highly under
+LLM-as-a-judge evaluation, but such apparent quality does not
+ensure runnability or scientific reproducibility. We propose a
+rubric- and execution-guided Paper to Code framework that
+verifies generated repositories through intermediate-value
+tests, runtime checks, and benchmark-level reproduction
+criteria. Our workflow parses papers into structured JSON,
+generates initial repositories through a planning-analysis-coding
+pipeline, constructs paper-specific rubrics and \texttt{pytest}
+tests, extracts runtime requirements, and packages the resulting
+task into a Harbor-style evaluation environment. On 22
+PaperBench papers, our prototype substantially improves
+runnability and reveals a large gap between executable
+repositories and scientifically reproducible repositories. These
+results suggest that Paper to Code evaluation should move beyond
+LLM-as-a-judge scores toward execution-grounded verification of
+algorithmic and experimental fidelity.
 \end{abstract}
 
 \section{Introduction}
 
-These instructions are for authors submitting papers to *ACL conferences using \LaTeX. They are not self-contained. All authors must follow the general instructions for *ACL proceedings,\footnote{\url{http://acl-org.github.io/ACLPUB/formatting.html}} and this document contains additional instructions for the \LaTeX{} style files.
+Reproducibility is foundational to scientific progress, enabling
+researchers to verify findings, build upon prior work, and push the
+boundaries of knowledge \citep{collaboration2015estimating, baker20161,
+pineau2021improving}. In machine learning, however, reproducing
+experimental results from a paper alone remains a persistent challenge:
+documentation is often incomplete, hyperparameters are under-specified,
+and a substantial fraction of accepted papers release no accompanying
+code \citep{seo2025papercoder}. This forces researchers to invest
+considerable effort reverse-engineering methods from prose, slowing
+the pace of scientific dissemination.
 
-The templates include the \LaTeX{} source of this document (\texttt{acl\_latex.tex}),
-the \LaTeX{} style file used to format it (\texttt{acl.sty}),
-an ACL bibliography style (\texttt{acl\_natbib.bst}),
-an example bibliography (\texttt{custom.bib}),
-and the bibliography for the ACL Anthology (\texttt{anthology.bib}).
+Recent Large Language Models (LLMs) have shown strong capabilities in
+both understanding scientific text and generating code
+\citep{dubey2024llama, openai2024gpt4, reid2024gemini}, prompting a
+wave of Paper to Code agents that aim to translate a research paper
+directly into an executable repository \citep{seo2025papercoder,
+starace2025paperbench, siegel2024corebench}. Systems such as
+PaperCoder \citep{seo2025papercoder} decompose this task into
+planning, analysis, and coding stages, and emit repositories that are
+structurally complete and stylistically convincing. Under
+LLM-as-a-judge evaluation, such repositories routinely receive high
+faithfulness scores. The implicit conclusion is that the generated
+code is a reasonable proxy for the paper's implementation.
 
-\section{Engines}
+We argue that this conclusion conflates three increasingly strict
+properties that should be kept distinct: whether a repository
+\emph{looks} faithful to the paper, whether it actually \emph{runs},
+and whether it \emph{reproduces} the paper's experimental behavior. A
+simple analogy is egg fried rice. A finished plate may look right,
+but a positive visual judgment does not entail that the cook
+understood the recipe, followed the correct procedure, or produced a
+dish with the expected taste. A judge that only inspects the plate
+cannot detect a missing ingredient, an inverted step, or a heat
+profile that differs from the original. The same holds for
+Paper to Code systems: a repository may use the wrong loss term, omit
+a key normalization, depend on an uninstalled package, or execute
+successfully yet fail to match the reported baseline. Existing
+benchmarks largely measure surface-level repository quality and do
+not separate these three properties, leaving open the question of
+whether current Paper to Code agents are reproducing science or
+merely producing code that resembles it.
 
-To produce a PDF file, pdf\LaTeX{} is strongly recommended (over original \LaTeX{} plus dvips+ps2pdf or dvipdf).
-The style file \texttt{acl.sty} can also be used with
-lua\LaTeX{} and
-Xe\LaTeX{}, which are especially suitable for text in non-Latin scripts.
-The file \texttt{acl\_lualatex.tex} in this repository provides
-an example of how to use \texttt{acl.sty} with either
-lua\LaTeX{} or
-Xe\LaTeX{}.
+To address this gap, we propose that paper to code evaluation should
+be \emph{execution-grounded} rather than \emph{appearance-based}, and
+we present a prototype framework that realizes this principle .
+Given a paper, the framework runs three parallel agents: a
+\textbf{coding agent} that emits an initial repository; a
+\textbf{rubric and unit-test generation agent} that converts paper
+claims into \texttt{pytest} cases targeting intermediate quantities
+and final outputs; and a \textbf{runtime-information extraction
+agent} that records hardware, package, dataset, and hyperparameter
+requirements. A subsequent code-running and amelioration stage uses
+rubric checks, test outcomes, and execution traces to revise the
+repository. The final artifact is packaged as a TerminalBench-style
+\citep{tbench2025} reproducibility task that can be replayed by
+external agents. The novelty here is not the multi-agent
+decomposition itself, but the shift in what counts as evidence of
+reproduction: rather than asking only whether the final result
+\emph{looks} right, the framework verifies that the repository
+computes the correct intermediate quantities, runs to completion,
+and satisfies benchmark-level criteria.
 
-\section{Preamble}
+We organize our investigation around three research questions:
+\begin{description}[leftmargin=1em,itemsep=0pt,topsep=2pt]
+  \item[\textbf{RQ1}] Does LLM-as-a-judge repository quality reflect
+    actual runnability and scientific reproducibility?
+  \item[\textbf{RQ2}] Can paper-specific rubrics and intermediate-value
+    tests better identify algorithmic implementation errors than
+    end-to-end output checks?
+  \item[\textbf{RQ3}] Can static and runtime feedback meaningfully
+    improve generated paper to code repositories?
+\end{description}
 
-The first line of the file must be
-\begin{quote}
-\begin{verbatim}
-\documentclass[11pt]{article}
-\end{verbatim}
-\end{quote}
+\noindent We make three contributions. \emph{First}, we identify and
+characterize a gap between apparent repository quality, executability,
+and scientific reproducibility in current paper to code agents.
+\emph{Second}, we propose a rubric- and execution-guided workflow that
+decomposes paper to code reproduction into paper understanding, code
+generation, rubric and unit-test generation, runtime-information
+extraction, static amelioration, and TerminalBench-style task
+packaging. \emph{Third}, we evaluate the prototype on 22 papers from
+PaperBench \citep{starace2025paperbench} and show that making
+generated repositories runnable is substantially easier than
+reproducing paper-level experimental claims, underscoring the need
+for intermediate-value verification and stronger runtime-guided
+refinement.
 
-To load the style file in the review version:
-\begin{quote}
-\begin{verbatim}
-\usepackage[review]{acl}
-\end{verbatim}
-\end{quote}
-For the final version, omit the \verb|review| option:
-\begin{quote}
-\begin{verbatim}
-\usepackage{acl}
-\end{verbatim}
-\end{quote}
+\section{Related Work}
 
-To use Times Roman, put the following in the preamble:
-\begin{quote}
-\begin{verbatim}
-\usepackage{times}
-\end{verbatim}
-\end{quote}
-(Alternatives like txfonts or newtx are also acceptable.)
+\paragraph{Paper-to-code generation.} PaperCoder
+\citep{seo2025papercoder} is the closest baseline to our work.
+It decomposes paper to code into planning, analysis, and coding
+stages and shows that structured repository generation
+improves implementation quality over single-prompt baselines.
+However, PaperCoder's main evaluation centers on repository-level
+faithfulness as judged by an LLM, with comparatively limited
+analysis of executability or experimental reproduction. Our
+framework adopts the planning-analysis-coding skeleton but
+extends it with paper-specific rubric generation, unit-test
+generation, runtime-information extraction, and a code-running
+amelioration loop intended to verify the generated repository
+against execution-grounded criteria.
 
-Please see the \LaTeX{} source of this document for comments on other packages that may be useful.
+\paragraph{Reproduction benchmarks.} A growing body of work
+benchmarks paper to code systems and code-using agents.
+PaperBench \citep{starace2025paperbench} measures whether agents
+can reproduce machine-learning papers from scratch using
+hierarchical rubrics, and provides the papers we use in our
+evaluation. SciReplicate-Bench
+\citep{scireplicate2024} focuses on reproducing
+algorithmic procedures from method sections.
+CORE-Bench \citep{corebench2024} evaluates the reproducibility
+of computational research more broadly, while REPRO-Bench
+\citep{reprobench2025} targets end-to-end reproduction with
+explicit execution checks. Compared to these benchmarks, our
+focus is not on building a static benchmark but on a
+\emph{generative} workflow that turns a paper into a reproducible
+task on the fly, while inheriting their key insight that
+execution must be part of evaluation.
 
-Set the title and author using \verb|\title| and \verb|\author|. Within the author list, format multiple authors using \verb|\and| and \verb|\And| and \verb|\AND|; please see the \LaTeX{} source for examples.
+\paragraph{Agentic terminal benchmarks.} Terminal-Bench
+\citep{tbench2025} evaluates agents on realistic terminal tasks
+using containerized environments, natural-language instructions,
+test suites, oracle solutions, and time limits. Our Harbor-style
+packaging adapts this evaluation philosophy to paper to code
+reproduction: the final artifact is not a static repository but a
+self-contained task that bundles paper, code, runtime
+specification, and tests.
 
-By default, the box containing the title and author names is set to the minimum of 5 cm. If you need more space, include the following in the preamble:
-\begin{quote}
-\begin{verbatim}
-\setlength\titlebox{<dim>}
-\end{verbatim}
-\end{quote}
-where \verb|<dim>| is replaced with a length. Do not set this length smaller than 5 cm.
+\paragraph{Test-time refinement.} Iterative self-debugging
+\citep{chen2023selfdebug,zhong2024debugbench} and best-of-$N$
+sampling approaches \citep{brown2024largelanguagemonkeys} have
+shown that test-time feedback can improve LLM code generation.
+Our amelioration loop is in this lineage, but uses
+\emph{paper-specific} rubrics and intermediate-value tests as the
+feedback signal, rather than generic correctness oracles or
+arbitrary unit tests.
 
-\section{Document Body}
+\section{Method}
 
-\subsection{Footnotes}
+In this section, we formalize the task of paper-to-code reproduction with paper-grounded evaluation, and then propose our multi-agent framework, which extends repository-level code generation with rubric-driven unit testing, runtime-aware execution, and benchmark packaging.
 
-Footnotes are inserted with the \verb|\footnote| command.\footnote{This is a footnote.}
+The goal of our task is to automatically produce a code repository that not only implements the methods and experiments described in a scientific paper, but also satisfies a paper-derived evaluation standard that distinguishes superficially plausible code from code that faithfully reproduces the paper's claims (Pineau et al., 2021; Starace et al., 2025). Formally, given a paper $R$, we define a mapping $\mathcal{M}$ that yields four artifacts:
+\[
+\mathcal{M}(R) = (C,\, U,\, I,\, B),
+\]
+where $C = \{c_1, \ldots, c_n\}$ is the generated code repository, $U$ is the paper-specific rubric together with an executable unit-test suite, $I$ is the structured runtime information required to execute the repository (including dataset and environment specifications), and $B$ is a Harbor-style reproducibility task bundle. The most straightforward approach to instantiating $\mathcal{M}$ is to instruct an LLM to generate $C$ alone, as in prior repository-level code generation work \citep{seo2025papercoder}; yet, $C$ alone underspecifies reproducibility, because it conflates the question of whether the code runs with the question of whether the code computes the right quantities. Therefore, we decompose $\mathcal{M}$ into five coordinated stages, with $U$ and $I$ derived directly from $R$ rather than from $C$, so that the paper---not the generated code---remains the source of ground truth. Formally, the overall pipeline is:
+\begin{align*}
+\text{Code Generation:}\;& (C,\,S) = \mathcal{M}_{\text{code}}(R), \\
+\text{Rubric/Tests:}\;& U = \mathcal{M}_{\text{rub}}(R,\,S), \\
+\text{Runtime/Dataset Info:}\;& I = \mathcal{M}_{\text{run}}(R,\,S), \\
+\text{Amelioration:}\;& C^{\star} = \mathcal{M}_{\text{amel}}(C,\,U,\,I), \\
+\text{Packaging:}\;& B = \mathcal{M}_{\text{pkg}}(R,\,C^{\star},\,U,\,I),
+\end{align*}
+where $S$ denotes a set of structured intermediate artifacts produced during code generation and reused by downstream agents. The overall pipeline is shown in Figure~\ref{fig:workflow}. We then describe how each stage is instantiated below.
 
-\subsection{Tables and figures}
+\subsection{Code Generation Phase}
 
-See Table~\ref{tab:accents} for an example of a table and its caption.
-\textbf{Do not override the default caption sizes.}
+The code generation phase is largely the same as PaperCoder \citep{seo2025papercoder}, which we adopt with two modifications. First, we prepend a preprocessing step that converts the input PDF into a cleaned JSON representation $R'$ (\texttt{paper.json}), with citation spans, bibliography entries, headers, and footers removed, so that all downstream agents reason over the same canonical input. Second, in addition to the repository $C$, this phase explicitly exposes a set of structured intermediate artifacts
+\[
+S = (R',\,P,\,A,\,E),
+\]
+where $P$ is the planning trajectory, $A$ is the per-file analyses, and $E$ is a paper-grounded extraction containing algorithmic specifications, equations, datasets, baselines, and reported metrics. These artifacts are reused downstream by the rubric agent (for paper-grounded test design), the unit-test agent (for alignment with the planned implementation), and the runtime/dataset agent (for environment and dataset specifications). We note that $S$ is derived from $R'$, not from $C$; conditioning downstream agents on $S$ therefore does not implicitly relax the evaluation standard to whatever the coding agent happened to produce.
 
-\begin{table}
-  \centering
-  \begin{tabular}{lc}
-    \hline
-    \textbf{Command} & \textbf{Output} \\
-    \hline
-    \verb|{\"a}|     & {\"a}           \\
-    \verb|{\^e}|     & {\^e}           \\
-    \verb|{\`i}|     & {\`i}           \\
-    \verb|{\.I}|     & {\.I}           \\
-    \verb|{\o}|      & {\o}            \\
-    \verb|{\'u}|     & {\'u}           \\
-    \verb|{\aa}|     & {\aa}           \\\hline
-  \end{tabular}
-  \begin{tabular}{lc}
-    \hline
-    \textbf{Command} & \textbf{Output} \\
-    \hline
-    \verb|{\c c}|    & {\c c}          \\
-    \verb|{\u g}|    & {\u g}          \\
-    \verb|{\l}|      & {\l}            \\
-    \verb|{\~n}|     & {\~n}           \\
-    \verb|{\H o}|    & {\H o}          \\
-    \verb|{\v r}|    & {\v r}          \\
-    \verb|{\ss}|     & {\ss}           \\
-    \hline
-  \end{tabular}
-  \caption{Example commands for accented characters, to be used in, \emph{e.g.}, Bib\TeX{} entries.}
-  \label{tab:accents}
+Formally, given a paper $R$, we define
+\[
+\mathcal{M}_{\text{code}}(R) := \mathcal{M}_{\text{debug}} \circ \mathcal{M}_{\text{depcode}} \circ \mathcal{M}_{\text{ana}} \circ \mathcal{M}_{\text{plan}} \circ \mathcal{M}_{\text{pre}}(R) \to (C,\,S),
+\]
+where the four core substeps follow PaperCoder closely.
+
+\textbf{Planning.} The planning agent extracts an overall plan, an architecture design, a logic design, and an initial \texttt{config.yaml}, yielding $P = \mathrm{LLM}(\mathcal{T}_{\text{plan}}(R'))$.
+
+\textbf{Per-file analysis.} For each file $f_i$ in the planned repository, the analysis agent writes a natural-language blueprint $a_i$ before any code is emitted, yielding $A = \{a_i\}_{i=1}^{|F|}$.
+
+\textbf{Dependency-aware coding.} Files are generated in dependency order, with $c_i = \mathrm{LLM}(\mathcal{T}_{\text{code}}(R',\,P,\,f_i,\,a_i,\,\{c_1, \ldots, c_{i-1}\}))$, yielding $C = \{c_i\}_{i=1}^{|F|}$.
+
+\textbf{Debugging.} If execution fails during amelioration, the debugging agent proposes minimal search--replace patches rather than rewriting whole files, preserving repository structure and reducing regressions.
+
+We refer the reader to \citet{seo2025papercoder} for full details of the four core substeps. Our contribution in this phase is the additional extraction of $E$ and the explicit downstream interface through $S$, which together enable the paper-grounded rubric, unit-test, and dataset agents described next.
+
+\subsection{Rubric and Unit-Test Generation}
+
+While the code generation phase answers \emph{what} to build, the rubric stage specifies \emph{what successful reproduction means}, and crucially does so without observing the generated repository. Conditioned on the paper $R$ and the structured artifacts $S$ -- but not on $C$ -- the rubric agent produces a structured rubric and an executable \texttt{pytest} suite:
+\[
+\mathcal{M}_{\text{rub}}(R,\,S) := \mathrm{LLM}(\mathcal{T}_{\text{rub}}(R,\,S)) \to U = (Q,\,V),
+\]
+where $Q$ is a rubric broken down into code-development, execution, and result-analysis items, and $V$ is the unit-test suite that operationalizes $Q$. Conditioning on $(R, S)$ rather than $C$ is deliberate: if the rubric were conditioned on $C$, the evaluation standard could be implicitly relaxed to fit whatever the coding agent produced, and the paper would no longer serve as ground truth. The structured artifacts in $S$---in particular the equations, algorithmic specifications, and reported metrics in $E$---let the rubric agent ground individual tests in specific equations and quantities of the paper rather than in vague natural-language descriptions. The generated tests fall into two levels.
+
+\textbf{Intermediate-value tests.} These tests check algorithmic internals---loss terms, diffusion coefficients, normalization invariants, tensor shapes, or values derived from specific equations in the paper. They are the diagnostically richest part of the framework: a system can have the right final number for the wrong reason, but it is much harder to silently match a battery of intermediate quantities.
+
+\textbf{Final-comparison tests.} These tests run benchmark-level checks: does the generated method match or outperform a stated baseline on the dataset and metric described in the paper? Final-comparison tests answer the externally visible question, while intermediate-value tests answer the internally faithful question.
+
+We note that this division is the core methodological contribution of our framework: rather than asking ``does the final result look right?'', it asks ``did the implementation compute the important internal quantities correctly, \emph{and} did it also produce the right final result?''.
+
+\subsection{Runtime and Dataset Information Extraction}
+
+Runtime setup is a different problem from code generation, and we treat it as such. Knowing that a paper requires CUDA 12 and a specific Torch version is not the same as knowing how to implement the model, and conflating the two leads to repositories that look correct in isolation but cannot be reproduced. We therefore introduce a dedicated agent that, conditioned on the paper $R$ and the structured artifacts $S$, extracts execution and dataset requirements into a structured artifact $I$:
+\[
+\mathcal{M}_{\text{run}}(R,\,S) := \mathrm{LLM}(\mathcal{T}_{\text{run}}(R,\,S)) \to I,
+\]
+where $I$ contains hardware requirements (e.g., GPU memory, CUDA version), package and Docker requirements, datasets and benchmarks (with download endpoints and split specifications), training requirements (e.g., epochs, batch size), hyperparameters and random seeds, and the metrics and reported results to be matched. Reusing the dataset and metric fields already extracted in $E$ avoids re-parsing the paper from scratch, and separating runtime information into its own structured artifact makes it possible to construct, verify, and reuse the environment independently of the code.
+
+\subsection{Code Running and Amelioration}
+
+The amelioration stage is intended to improve the repository using the rubric items in $U$, the runtime information in $I$, and execution feedback. Formally,
+\begin{equation*}
+\begin{aligned}
+\mathcal{M}_{\text{code}}(R) :={}& \mathcal{M}_{\text{debug}}\circ\, \mathcal{M}_{\text{depcode}}\circ\, \mathcal{M}_{\text{ana}} \\
+&\circ\, \mathcal{M}_{\text{plan}} \circ\, \mathcal{M}_{\text{pre}}(R)\to (C,\,S).
+\end{aligned}
+\end{equation*}
+which we instantiate through two coordinated sub-loops, of which the first is currently complete and the second is partially in place.
+
+\textbf{Static amelioration loop (implemented).} The static loop takes the generated repository together with the paper-specific rubric and checks code-development items that can be judged without execution---for instance, that the loss function contains a required penalty term, that the configuration file uses the correct hyperparameter, or that a named module exists at the expected location. When a rubric item fails, the LLM proposes minimal search--replace patches and the loop iterates. Many reproduction errors are visible in source code and can be corrected cheaply at this stage, before any training run is launched.
+
+\textbf{Runtime run-and-fix loop } The full runtime loop, which we describe as the intended next step, should: (1) read $I$; (2) build or configure the environment; (3) download datasets and baselines; (4) run \texttt{reproduce.sh}; (5) execute the generated \texttt{pytest} suite $V$; (6) read \texttt{scores/scores.json}; (7) feed failing tests and logs back to the debugger $\mathcal{M}_{\text{debug}}$; and (8) patch and rerun until tests pass or the iteration cap is reached. The current codebase contains most components in isolation: dataset downloading, debugging via search--replace patches, unit-test execution, and Harbor packaging.
+
+
+
+\section{Experimental Setup}
+
+We now describe the experimental setup and the metrics used to distinguish appearance-based from execution-grounded reproduction quality.
+
+\textbf{Papers.} We evaluate the prototype on 22 papers drawn from PaperBench \citep{starace2025paperbench}, spanning a mix of deep-learning, optimization, and benchmark-style contributions. The papers were selected to cover a range of structural complexity and dataset requirements.
+
+\textbf{Backbone.} The backbone model for all agents is GPT-5.2. Calls are routed through the same client and use a shared system-prompt template per stage; only the stage-specific instructions $\mathcal{T}_{\text{stage}}$ and the cleaned input $R'$ differ across calls.
+
+\textbf{Environment.} Each generated repository is packaged into a Harbor-style task with paper JSON, generated code, runtime information, \texttt{pytest} tests, and a weighted reward script. Tasks are run under a 30-minute timeout on a local machine with an RTX 4060.
+
+\textbf{Metrics.} We report three metrics that together separate
+superficial faithfulness from execution-grounded reproduction:
+(i) \emph{LLM Judge Score}, evaluated by GPT-5.2 against a set of
+generated rubrics (Section~\ref{sec:rubrics});
+(ii) \emph{Runnable Rate}, whether the repository can execute without
+fatal errors; and
+(iii) \emph{Reproduction Score}, a weighted score over code-development,
+execution, and result-analysis tests; we do not separately report an
+intermediate-value pass rate, since it is subsumed by this score.
+
+\section{Results}
+We report preliminary results on the 22-paper set; we treat
+these numbers as a sanity check on the framework rather than as
+a final evaluation.
+
+compared two agents p2c agent and our p2r agent.
+a) runnable 0 / 100%
+b) LLM Judge Score 65 / 85%
+BE-CBO case study (cite) 
+c) Reproduction of Intermediate Value Score -/ 72%
+Some intermediate value is removed to make it runnable
+d) Reproduction of comparison with baseline -/15%
+
+Score for each paper and analysis(figure)
+
+
+\paragraph{From plausible to runnable.} Our system improves the
+coding score from approximately $65\%$ to $85\%$ relative to a
+baseline that uses the planning-analysis-coding pipeline without
+rubric- or execution-guided amelioration. All 22 generated
+repositories are runnable under our evaluation protocol,
+indicating that the static amelioration loop together with the
+generated runtime information is sufficient to remove most
+fatal-error cases.
+
+\paragraph{From runnable to faithful internals.} The generated
+repositories implement approximately $70\%$ of essential
+paper-specific components, as measured by intermediate-value test
+pass rate. This is substantially below the LLM judge score on the
+same repositories, which reaffirms RQ1: appearance-based judgment
+overestimates faithfulness.
+
+\paragraph{From faithful internals to reproduced results.} Only
+about $23\%$ of repositories match or outperform the paper's
+stated baselines on final-comparison tests. The gap between the
+intermediate-value pass rate and the baseline-outperformance rate
+shows that even when many internal components are correct,
+reaching the paper's reported numbers is much harder, due to
+factors such as dataset-specific preprocessing, baseline
+availability, training budget, and hyperparameter sensitivity.
+
+\paragraph{Per-paper variance.} Reproduction scores vary
+substantially across papers. Some papers, such as BE-CBO, achieve
+high reproduction scores; others fail to reproduce final results
+despite being runnable, with the failure typically attributable to
+dataset retrieval, baseline setup, or structural complexity rather
+than to a single localizable bug in the generated model code.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Prototype} \\
+\midrule
+LLM Judge Score (coding)         & $\approx 85\%$ \\
+Runnable Rate                    & $22/22$        \\
+Essential Component Score        & $\approx 70\%$ \\
+Baseline Outperformance Rate     & $\approx 23\%$ \\
+\bottomrule
+\end{tabular}
+\caption{Preliminary results on 22 PaperBench papers with
+GPT-5.2. Numbers are intended as a sanity check and are
+expected to change as the runtime run-and-fix loop is
+completed.}
+\label{tab:results}
 \end{table}
 
-As much as possible, fonts in figures should conform
-to the document fonts. See Figure~\ref{fig:experiments} for an example of a figure and its caption.
+\section{Discussion}
 
-Using the \verb|graphicx| package graphics files can be included within figure
-environment at an appropriate point within the text.
-The \verb|graphicx| package supports various optional arguments to control the
-appearance of the figure.
-You must include it explicitly in the \LaTeX{} preamble (after the
-\verb|\documentclass| declaration and before \verb|\begin{document}|) using
-\verb|\usepackage{graphicx}|.
+\paragraph{Answering RQ1.} The gap between LLM judge scores and
+intermediate-value pass rates supports the claim that
+``seems good'' is not enough. A judge that inspects only the
+final repository can miss a missing penalty term, an off-by-one
+normalization, or an incorrect optimizer setting that does not
+prevent the code from running.
 
-\begin{figure}[t]
-  \includegraphics[width=\columnwidth]{example-image-golden}
-  \caption{A figure with a caption that runs for more than one line.
-    Example image is usually available through the \texttt{mwe} package
-    without even mentioning it in the preamble.}
-  \label{fig:experiments}
-\end{figure}
+\paragraph{Answering RQ2.} Intermediate-value tests are the
+strongest diagnostic component of the framework. In several
+case studies, an intermediate-value test caught an error that
+neither LLM judge inspection nor final metric comparison could
+isolate, because the final metric was either similar to baseline
+by coincidence or unreachable due to a separate runtime issue.
 
-\begin{figure*}[t]
-  \includegraphics[width=0.48\linewidth]{example-image-a} \hfill
-  \includegraphics[width=0.48\linewidth]{example-image-b}
-  \caption {A minimal working example to demonstrate how to place
-    two images side-by-side.}
-\end{figure*}
+\paragraph{Answering RQ3.} The static amelioration loop already
+provides substantial improvements in code-development quality at
+low cost. The full answer to RQ3, however, requires the
+completed runtime run-and-fix loop, which we leave to future
+work.
 
-\subsection{Hyperlinks}
+\paragraph{Case study: BE-CBO.} BE-CBO is illustrative because
+its acquisition function and constraint-handling logic admit
+crisp intermediate checks. The framework generates tests for the
+acquisition value at known inputs and for the shape of the
+posterior under a fixed seed, which the amelioration loop is able
+to satisfy after a small number of patches. The resulting
+repository is both runnable and matches the reported baseline,
+showing what the framework can achieve when paper-specific tests
+have well-defined ground truth.
 
-Users of older versions of \LaTeX{} may encounter the following error during compilation:
-\begin{quote}
-\verb|\pdfendlink| ended up in different nesting level than \verb|\pdfstartlink|.
-\end{quote}
-This happens when pdf\LaTeX{} is used and a citation splits across a page boundary. The best way to fix this is to upgrade \LaTeX{} to 2018-12-01 or later.
-
-\subsection{Citations}
-
-\begin{table*}
-  \centering
-  \begin{tabular}{lll}
-    \hline
-    \textbf{Output}           & \textbf{natbib command} & \textbf{ACL only command} \\
-    \hline
-    \citep{Gusfield:97}       & \verb|\citep|           &                           \\
-    \citealp{Gusfield:97}     & \verb|\citealp|         &                           \\
-    \citet{Gusfield:97}       & \verb|\citet|           &                           \\
-    \citeyearpar{Gusfield:97} & \verb|\citeyearpar|     &                           \\
-    \citeposs{Gusfield:97}    &                         & \verb|\citeposs|          \\
-    \hline
-  \end{tabular}
-  \caption{\label{citation-guide}
-    Citation commands supported by the style file.
-    The style is based on the natbib package and supports all natbib citation commands.
-    It also supports commands defined in previous ACL style files for compatibility.
-  }
-\end{table*}
-
-Table~\ref{citation-guide} shows the syntax supported by the style files.
-We encourage you to use the natbib styles.
-You can use the command \verb|\citet| (cite in text) to get ``author (year)'' citations, like this citation to a paper by \citet{Gusfield:97}.
-You can use the command \verb|\citep| (cite in parentheses) to get ``(author, year)'' citations \citep{Gusfield:97}.
-You can use the command \verb|\citealp| (alternative cite without parentheses) to get ``author, year'' citations, which is useful for using citations within parentheses (e.g. \citealp{Gusfield:97}).
-
-A possessive citation can be made with the command \verb|\citeposs|.
-This is not a standard natbib command, so it is generally not compatible
-with other style files.
-
-\subsection{References}
-
-\nocite{Ando2005,andrew2007scalable,rasooli-tetrault-2015}
-
-The \LaTeX{} and Bib\TeX{} style files provided roughly follow the American Psychological Association format.
-If your own bib file is named \texttt{custom.bib}, then placing the following before any appendices in your \LaTeX{} file will generate the references section for you:
-\begin{quote}
-\begin{verbatim}
-\bibliography{custom}
-\end{verbatim}
-\end{quote}
-
-You can obtain the complete ACL Anthology as a Bib\TeX{} file from \url{https://aclweb.org/anthology/anthology.bib.gz}.
-To include both the Anthology and your own .bib file, use the following instead of the above.
-\begin{quote}
-\begin{verbatim}
-\bibliography{anthology,custom}
-\end{verbatim}
-\end{quote}
-
-Please see Section~\ref{sec:bibtex} for information on preparing Bib\TeX{} files.
-
-\subsection{Equations}
-
-An example equation is shown below:
-\begin{equation}
-  \label{eq:example}
-  A = \pi r^2
-\end{equation}
-
-Labels for equation numbers, sections, subsections, figures and tables
-are all defined with the \verb|\label{label}| command and cross references
-to them are made with the \verb|\ref{label}| command.
-
-This an example cross-reference to Equation~\ref{eq:example}.
-
-\subsection{Appendices}
-
-Use \verb|\appendix| before any appendix section to switch the section numbering over to letters. See Appendix~\ref{sec:appendix} for an example.
-
-\section{Bib\TeX{} Files}
-\label{sec:bibtex}
-
-Unicode cannot be used in Bib\TeX{} entries, and some ways of typing special characters can disrupt Bib\TeX's alphabetization. The recommended way of typing special characters is shown in Table~\ref{tab:accents}.
-
-Please ensure that Bib\TeX{} records contain DOIs or URLs when possible, and for all the ACL materials that you reference.
-Use the \verb|doi| field for DOIs and the \verb|url| field for URLs.
-If a Bib\TeX{} entry has a URL or DOI field, the paper title in the references section will appear as a hyperlink to the paper, using the hyperref \LaTeX{} package.
+\paragraph{Case study: Failure modes.} Several papers produce
+repositories that pass the LLM judge and run end-to-end, yet
+fail final-comparison tests. The most common failure modes are
+(i) incorrect dataset retrieval or preprocessing, (ii) missing or
+substituted baselines, and (iii) under-specified training
+budgets. These are precisely the kinds of issues that
+appearance-based evaluation cannot catch, and that motivate
+moving evaluation toward execution-grounded verification.
 
 \section*{Limitations}
 
-This document does not cover the content requirements for ACL or any
-other specific venue.  Check the author instructions for
-information on
-maximum page lengths, the required ``Limitations'' section,
-and so on.
+This work has several limitations. First, the runtime run-and-fix
+loop is not fully implemented; while the components exist, the
+top-level orchestrator that ties them into a single autonomous
+process is future work. Second, our experiments cover 22 papers
+under a single backbone (GPT-5.2) and a single hardware budget;
+broader coverage and multiple-seed runs are needed before any
+conclusions about absolute performance can be drawn. Third, our
+intermediate-value tests are themselves LLM-generated from the
+paper; while we keep them blind to the generated repository,
+they may still inherit biases from the backbone, and a careful
+audit of test quality is needed. Fourth, dataset and baseline
+fetching are not always reliable, and some failures are
+infrastructure failures rather than implementation failures.
+Fifth, we do not yet run formal ablations isolating the
+contribution of each stage.
 
-\section*{Acknowledgments}
+\section{Future Work}
 
-This document has been adapted
-by Steven Bethard, Ryan Cotterell and Rui Yan
-from the instructions for earlier ACL and NAACL proceedings, including those for
-ACL 2019 by Douwe Kiela and Ivan Vuli\'{c},
-NAACL 2019 by Stephanie Lukin and Alla Roskovskaya,
-ACL 2018 by Shay Cohen, Kevin Gimpel, and Wei Lu,
-NAACL 2018 by Margaret Mitchell and Stephanie Lukin,
-Bib\TeX{} suggestions for (NA)ACL 2017/2018 from Jason Eisner,
-ACL 2017 by Dan Gildea and Min-Yen Kan,
-NAACL 2017 by Margaret Mitchell,
-ACL 2012 by Maggie Li and Michael White,
-ACL 2010 by Jing-Shin Chang and Philipp Koehn,
-ACL 2008 by Johanna D. Moore, Simone Teufel, James Allan, and Sadaoki Furui,
-ACL 2005 by Hwee Tou Ng and Kemal Oflazer,
-ACL 2002 by Eugene Charniak and Dekang Lin,
-and earlier ACL and EACL formats written by several people, including
-John Chen, Henry S. Thompson and Donald Walker.
-Additional elements were taken from the formatting instructions of the \emph{International Joint Conference on Artificial Intelligence} and the \emph{Conference on Computer Vision and Pattern Recognition}.
+\textbf{Full runtime orchestrator.} The most immediate next step
+is to implement the full runtime run-and-fix orchestrator that
+sequences environment build, dataset retrieval,
+\texttt{reproduce.sh} execution, test running, log ingestion, and
+patch application into a single loop bounded by an iteration
+cap.
 
-% Bibliography entries for the entire Anthology, followed by custom entries
-%\bibliography{anthology,custom}
-% Custom bibliography entries only
+\textbf{Stronger environment builder.} Many papers require
+specific CUDA versions, Torch versions, GPU memory budgets, or
+non-Python dependencies. A better environment builder should
+translate the runtime-info JSON into a concrete \texttt{Dockerfile}
+and installation script, with verifiable post-build checks.
+
+\textbf{Improved dataset and baseline fetching.} Preliminary
+results suggest that low reproduction scores are often caused by
+dataset retrieval or baseline availability, not by model
+implementation errors. Targeted improvements in this area are
+likely to raise reproduction scores more than additional
+amelioration of model code.
+
+\textbf{Formal ablations.} Important ablations include removing
+intermediate-value tests, removing static amelioration, removing
+runtime feedback, and comparing against a PaperCoder-only
+baseline under matched conditions. These ablations would
+quantify the contribution of each component of the framework.
+
+\textbf{Stronger case studies.} BE-CBO illustrates how
+intermediate-value tests detect whether key algorithmic
+components are correctly implemented. Negative cases are equally
+informative, since they show how repositories may be runnable
+yet scientifically incorrect, and they argue most strongly for
+execution-grounded evaluation.
+
+\section{Conclusion}
+
+PaperCoder asks whether an LLM can generate a faithful-looking
+repository from a paper. Terminal-Bench asks whether an agent can
+solve realistic terminal tasks under tests. Our project sits
+between the two and asks whether a Paper to Code system can
+generate a repository that not only looks good, but also runs
+and satisfies paper-specific scientific reproduction tests. We
+present a rubric- and execution-guided framework that turns a
+paper into an initial repository, paper-specific rubrics,
+intermediate-value tests, runtime requirements, and a Harbor-style
+reproducibility task. On 22 PaperBench papers, the prototype
+substantially improves runnability and exposes a large gap between
+executable and scientifically reproducible repositories. We view
+this as evidence that Paper to Code evaluation should move beyond
+LLM-as-a-judge scores toward execution-grounded verification of
+algorithmic and experimental fidelity.
+
+% Bibliography
 \bibliography{custom}
 
 \appendix
 
-\section{Example Appendix}
-\label{sec:appendix}
+\section{Workflow Diagram}
+\label{sec:appendix-workflow}
 
-This is an appendix.
+A high-level workflow diagram is included in the camera-ready
+version of this paper. The diagram shows the five stages
+described in Section~3, the data dependencies between them, and
+the placement of the static amelioration loop and the planned
+runtime run-and-fix loop.
+
+\section{Generated Test Examples}
+\label{sec:appendix-tests}
+
+For space, we omit full listings of generated rubrics and
+\texttt{pytest} files. A representative example for BE-CBO,
+together with the corresponding patches produced by the static
+amelioration loop, is included with the project's supplementary
+materials.
 
 \end{document}
