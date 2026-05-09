@@ -192,6 +192,39 @@ arbitrary unit tests.
 
 \section{Method}
 
+% ---------------------------------------------------------------
+% Workflow figure. Spans both columns (figure*) because the
+% pipeline reads horizontally across five stages. Placed at the
+% top of the Method section so it appears near its first textual
+% reference (\ref{fig:workflow}) below.
+% Replace `workflow.png` with the final rendered diagram before
+% camera-ready submission.
+% ---------------------------------------------------------------
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=0.95\textwidth]{Fig/workflow.png}
+  \caption{Overview of the Paper2Repro workflow. The input paper
+  $R$ is first preprocessed into a cleaned JSON
+  representation $R'$, which feeds three parallel agents:
+  (i) a \textbf{code generation} agent that produces the
+  repository $C$ together with structured intermediate
+  artifacts $S = (R', P, A, E)$;
+  (ii) a \textbf{rubric and unit-test generation} agent that
+  emits a paper-specific rubric $Q$ and a \texttt{pytest}
+  suite $V$, conditioned on $(R, S)$ but not on $C$ so the
+  paper remains the source of ground truth; and
+  (iii) a \textbf{runtime and dataset information} agent that
+  extracts the structured runtime artifact $I$. The
+  \textbf{amelioration} stage combines $C$, $U=(Q,V)$, and
+  $I$ via a static loop (rubric-driven search--replace patches)
+  and a planned runtime run-and-fix loop (dashed) to yield the
+  refined repository $C^{\star}$. The final \textbf{packaging}
+  stage bundles $(R, C^{\star}, U, I)$ into a Harbor-style
+  reproducibility task $B$ that can be replayed by external
+  agents.}
+  \label{fig:workflow}
+\end{figure*}
+
 In this section, we formalize the task of paper-to-code reproduction with paper-grounded evaluation, and then propose our multi-agent framework, which extends repository-level code generation with rubric-driven unit testing, runtime-aware execution, and benchmark packaging.
 
 The goal of our task is to automatically produce a code repository that not only implements the methods and experiments described in a scientific paper, but also satisfies a paper-derived evaluation standard that distinguishes superficially plausible code from code that faithfully reproduces the paper's claims (Pineau et al., 2021; Starace et al., 2025). Formally, given a paper $R$, we define a mapping $\mathcal{M}$ that yields four artifacts:
@@ -431,7 +464,7 @@ in the evaluation set, color-coded by difficulty tier.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.85\textwidth]{reproduction_score_estimates_72.png}
+\includegraphics[width=0.85\textwidth]{Fig/reproduction_score_estimates_72.png}
 \caption{Estimated intermediate-value correctness per paper
 (prior, calibrated to a 72.8\% mean). Difficulty tiers run from
 T0 (generation failed) to T5 (easier, LLM-only).}
@@ -440,7 +473,7 @@ T0 (generation failed) to T5 (easier, LLM-only).}
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=0.85\textwidth]{reproduction_score_estimates.png}
+\includegraphics[width=0.85\textwidth]{Fig/reproduction_score_estimates.png}
 \caption{Estimated final reproduction score per paper
 (outperforms stated baseline; prior). Mean is 16.2\% across 26
 real papers; T6 ``best-tooled'' (BE-CBO with custom
@@ -585,11 +618,11 @@ algorithmic and experimental fidelity.
 \section{Workflow Diagram}
 \label{sec:appendix-workflow}
 
-A high-level workflow diagram is included in the camera-ready
-version of this paper. The diagram shows the five stages
-described in Section~3, the data dependencies between them, and
-the placement of the static amelioration loop and the planned
-runtime run-and-fix loop.
+The high-level workflow diagram is presented in
+Figure~\ref{fig:workflow} in the main text. It depicts the
+five stages described in Section~3, the data dependencies
+between them, and the placement of the static amelioration loop
+and the planned runtime run-and-fix loop.
 
 \section{Generated Test Examples}
 \label{sec:appendix-tests}
