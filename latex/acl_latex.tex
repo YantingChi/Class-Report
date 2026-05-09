@@ -364,7 +364,7 @@ availability, and training budget---issues that the static
 amelioration loop is not designed to fix and that the runtime
 run-and-fix loop is intended to address.
 
-\subsection{BE-CBO Case Study}
+\subsection{Case Study: The Code Quality of BE-CBO Repo }
 
 BE-CBO is a useful case study because its acquisition function
 and constraint-handling logic admit crisp, paper-specific
@@ -504,24 +504,7 @@ low cost. The full answer to RQ3, however, requires the
 completed runtime run-and-fix loop, which we leave to future
 work.
 
-\paragraph{Case study: BE-CBO.} BE-CBO is illustrative because
-its acquisition function and constraint-handling logic admit
-crisp intermediate checks. The framework generates tests for the
-acquisition value at known inputs and for the shape of the
-posterior under a fixed seed, which the amelioration loop is able
-to satisfy after a small number of patches. The resulting
-repository is both runnable and matches the reported baseline,
-showing what the framework can achieve when paper-specific tests
-have well-defined ground truth.
 
-\paragraph{Case study: Failure modes.} Several papers produce
-repositories that pass the LLM judge and run end-to-end, yet
-fail final-comparison tests. The most common failure modes are
-(i) incorrect dataset retrieval or preprocessing, (ii) missing or
-substituted baselines, and (iii) under-specified training
-budgets. These are precisely the kinds of issues that
-appearance-based evaluation cannot catch, and that motivate
-moving evaluation toward execution-grounded verification.
 
 \section*{Limitations}
 
