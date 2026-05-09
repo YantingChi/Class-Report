@@ -52,8 +52,8 @@ algorithmic and experimental fidelity.
 
 \section{Introduction}
 
-Reproducibility is foundational to scientific progress, enabling
-researchers to verify findings, build upon prior work, and push the
+Reproducibility is essential for scientific progress, allowing
+researchers to verify findings, build on previous work, and push the
 boundaries of knowledge \citep{collaboration2015estimating, baker20161,
 pineau2021improving}. In machine learning, however, reproducing
 experimental results from a paper alone remains a persistent challenge:
@@ -165,7 +165,7 @@ evaluation. SciReplicate-Bench
 algorithmic procedures from method sections.
 CORE-Bench \citep{corebench2024} evaluates the reproducibility
 of computational research more broadly, while REPRO-Bench
-\citep{reprobench2025} targets end-to-end reproduction with
+\citep{hu2025reprobench} targets end-to-end reproduction with
 explicit execution checks. Compared to these benchmarks, our
 focus is not on building a static benchmark but on a
 \emph{generative} workflow that turns a paper into a reproducible
@@ -317,7 +317,7 @@ We now describe the experimental setup and the metrics used to distinguish appea
 \textbf{Metrics.} We report three metrics that together separate
 superficial faithfulness from execution-grounded reproduction:
 (i) \emph{LLM Judge Score}, evaluated by GPT-5.2 against a set of
-generated rubrics (Section~\ref{sec:rubrics});
+generated rubrics ;
 (ii) \emph{Runnable Rate}, whether the repository can execute without
 fatal errors; and
 (iii) \emph{Reproduction Score}, a weighted score over code-development,
