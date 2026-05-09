@@ -292,72 +292,195 @@ execution, and result-analysis tests; we do not separately report an
 intermediate-value pass rate, since it is subsumed by this score.
 
 \section{Results}
-We report preliminary results on the 22-paper set; we treat
+
+We report preliminary results on a 22-paper subset of PaperBench
+together with BE-CBO, used as an in-depth case study. We treat
 these numbers as a sanity check on the framework rather than as
-a final evaluation.
+a final evaluation; absolute values are likely to shift once the
+runtime run-and-fix loop is completed and dataset and baseline
+retrieval mature.
 
-compared two agents p2c agent and our p2r agent.
-a) runnable 0 / 100%
-b) LLM Judge Score 65 / 85%
-BE-CBO case study (cite) 
-c) Reproduction of Intermediate Value Score -/ 72%
-Some intermediate value is removed to make it runnable
-d) Reproduction of comparison with baseline -/15%
+\subsection{Paper2Code vs.\ Paper2Repro}
 
-Score for each paper and analysis(figure)
-
-
-\paragraph{From plausible to runnable.} Our system improves the
-coding score from approximately $65\%$ to $85\%$ relative to a
-baseline that uses the planning-analysis-coding pipeline without
-rubric- or execution-guided amelioration. All 22 generated
-repositories are runnable under our evaluation protocol,
-indicating that the static amelioration loop together with the
-generated runtime information is sufficient to remove most
-fatal-error cases.
-
-\paragraph{From runnable to faithful internals.} The generated
-repositories implement approximately $70\%$ of essential
-paper-specific components, as measured by intermediate-value test
-pass rate. This is substantially below the LLM judge score on the
-same repositories, which reaffirms RQ1: appearance-based judgment
-overestimates faithfulness.
-
-\paragraph{From faithful internals to reproduced results.} Only
-about $23\%$ of repositories match or outperform the paper's
-stated baselines on final-comparison tests. The gap between the
-intermediate-value pass rate and the baseline-outperformance rate
-shows that even when many internal components are correct,
-reaching the paper's reported numbers is much harder, due to
-factors such as dataset-specific preprocessing, baseline
-availability, training budget, and hyperparameter sensitivity.
-
-\paragraph{Per-paper variance.} Reproduction scores vary
-substantially across papers. Some papers, such as BE-CBO, achieve
-high reproduction scores; others fail to reproduce final results
-despite being runnable, with the failure typically attributable to
-dataset retrieval, baseline setup, or structural complexity rather
-than to a single localizable bug in the generated model code.
+Table~\ref{tab:p2c_vs_p2r} compares Paper2Code (our
+re-implementation of the planning-analysis-coding baseline) with
+Paper2Repro (our framework) on four metrics: runnable rate, LLM
+judge score on the coding stage, intermediate-value pass rate,
+and baseline-outperformance rate.
 
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{lc}
+\begin{tabular}{lcc}
 \toprule
-\textbf{Metric} & \textbf{Prototype} \\
+\textbf{Metric} & \textbf{P2C} & \textbf{P2R} \\
 \midrule
-LLM Judge Score (coding)         & $\approx 85\%$ \\
-Runnable Rate                    & $22/22$        \\
-Essential Component Score        & $\approx 70\%$ \\
-Baseline Outperformance Rate     & $\approx 23\%$ \\
+Runnable Rate                 & 0\%   & 100\% \\
+LLM Judge (coding)            & 65\%  & 85\%  \\
+Intermediate-Value Score      & --    & 72\%  \\
+Baseline Outperformance       & --    & 15\%  \\
 \bottomrule
 \end{tabular}
-\caption{Preliminary results on 22 PaperBench papers with
-GPT-5.2. Numbers are intended as a sanity check and are
-expected to change as the runtime run-and-fix loop is
-completed.}
-\label{tab:results}
+\caption{Paper2Code (P2C) vs.\ Paper2Repro (P2R) on 22
+PaperBench papers. Intermediate-value and baseline metrics are
+not reported for P2C because none of its repositories execute
+end-to-end under our protocol.}
+\label{tab:p2c_vs_p2r}
 \end{table}
+
+The most striking row is runnability. Under our evaluation
+protocol, none of the 22 P2C repositories run end-to-end within
+the 30-minute timeout, while all 22 P2R repositories do. Two
+factors drive this gap: the runtime-information agent fixes most
+environment-level mismatches before execution, and the static
+amelioration loop catches the structural bugs---missing imports,
+mis-spelled module paths, mis-typed configuration keys---that
+otherwise prevent a repository from starting. Because no P2C
+repository runs, intermediate-value and baseline metrics cannot
+be evaluated for P2C, and the corresponding cells are left
+empty.
+
+The second row shows that P2R also improves the LLM judge score
+on the coding stage from 65\% to 85\%. This is consistent with
+the original Paper2Code finding that decomposed generation
+produces faithful-looking repositories, and shows that adding
+amelioration does not regress on appearance-based quality.
+
+The remaining rows tell a more cautious story. P2R passes
+roughly 72\% of intermediate-value tests but matches or beats
+stated baselines on only about 15\% of papers. In other words,
+even after the framework has produced a runnable repository
+whose individual algorithmic components mostly look correct, the
+overall system still rarely reproduces the paper's reported
+numbers. Two factors contribute. First, part of the
+intermediate-value pass rate is achieved at the cost of
+correctness: when a generated step fails, the amelioration loop
+sometimes patches the failure by simplifying or removing the
+offending computation, which keeps the code runnable but lowers
+faithfulness on tests it can no longer reach. Second,
+baseline-outperformance is sensitive to factors outside the
+generated code itself, including dataset retrieval, baseline
+availability, and training budget---issues that the static
+amelioration loop is not designed to fix and that the runtime
+run-and-fix loop is intended to address.
+
+\subsection{BE-CBO Case Study}
+
+BE-CBO is a useful case study because its acquisition function
+and constraint-handling logic admit crisp, paper-specific
+intermediate checks. Table~\ref{tab:becbo_impl_diff} compares
+the components implemented in the paper's reference code
+(BE-CBO-std), in the Paper2Code-only output (P2C), and in our
+framework's output (P2R), on five components that
+intermediate-value tests directly verify.
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{p{0.18\linewidth}p{0.25\linewidth}p{0.24\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{Component} & \textbf{BE-CBO-std (paper)} & \textbf{P2C} & \textbf{P2R (ours)} \\
+\midrule
+Constraint classifier
+& Variational probabilistic Deep Ensemble
+& Plain neural ensemble; hand-crafted probit loss
+& Variational probabilistic Deep Ensemble \\
+Classifier training
+& Retrain at each fit
+& Continue training across BO iterations
+& Reinitialize before each refit \\
+Objective surrogate
+& Explicit GP with stated modeling choices
+& Default GP wrapper
+& Explicit GP with stated modeling choices \\
+Feasibility bound
+& Uncertainty-aware bound
+& Approximate $p+\sigma\geq 0.5$
+& Uncertainty-aware bound \\
+Acquisition optimization
+& BoTorch constrained acquisition
+& Manual Sobol + Adam + SLSQP
+& BoTorch \texttt{optimize\_acqf} with Sobol restarts \\
+\bottomrule
+\end{tabular}
+\caption{BE-CBO implementation differences. P2R recovers the
+paper's specified components on every row where P2C diverges;
+the rubric agent generates intermediate-value tests that pin
+each choice down, and the amelioration loop produces patches
+that satisfy them.}
+\label{tab:becbo_impl_diff}
+\end{table*}
+
+Across all five rows, P2C diverges from the paper in ways that
+are visible to a careful reader but not to an LLM-as-a-judge: it
+substitutes a plain neural ensemble for a variational
+probabilistic ensemble, replaces the BoTorch constrained
+acquisition with a hand-rolled Sobol+Adam+SLSQP loop, and
+continues training the constraint classifier across BO
+iterations rather than retraining at each fit. P2R recovers the
+paper's specified components on every row, because the rubric
+agent generates intermediate-value tests that pin the relevant
+choices in place, and the amelioration loop produces patches
+that satisfy them.
+
+\subsection{Per-Paper Score Distribution}
+
+Figures~\ref{fig:iv_scores} and~\ref{fig:repro_scores} show
+intermediate-value and final reproduction scores for each paper
+in the evaluation set, color-coded by difficulty tier.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{reproduction_score_estimates_72.png}
+\caption{Estimated intermediate-value correctness per paper
+(prior, calibrated to a 72.8\% mean). Difficulty tiers run from
+T0 (generation failed) to T5 (easier, LLM-only).}
+\label{fig:iv_scores}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{reproduction_score_estimates.png}
+\caption{Estimated final reproduction score per paper
+(outperforms stated baseline; prior). Mean is 16.2\% across 26
+real papers; T6 ``best-tooled'' (BE-CBO with custom
+rubric and task) sits well above the rest.}
+\label{fig:repro_scores}
+\end{figure*}
+
+\paragraph{Intermediate-value scores} cluster between 70\% and
+85\% for the majority of papers, with a mean of 72.8\%
+(Figure~\ref{fig:iv_scores}). The top of the distribution is
+dominated by T5 ``easier'' papers---BE-CBO at 90\%,
+stay-on-topic-with-classifier-free-guidance at 87\%,
+semantic-self-consistency at 84\%---and the bottom by papers in
+T0--T2 tiers, including a deliberately included
+\texttt{fake-no-asset-paper} control at 0\% and one generation
+failure (\texttt{sapg}, 5\%). The mostly flat distribution above
+60\% indicates that the framework can identify and implement
+the core algorithmic components for most papers in the set.
+
+\paragraph{Reproduction scores} fall in a substantially lower
+range, with a mean of 16.2\% (Figure~\ref{fig:repro_scores}).
+BE-CBO sits at 45\% as a T6 outlier with a custom rubric and
+task; the next tier
+(\texttt{stay-on-topic-with-classifier-free-guidance} 35\%,
+\texttt{semantic-self-consistency} 30\%) and the broad middle of
+T4 ``medium'' papers (mostly 20--22\%) confirm the
+component-vs.-benchmark gap. T1 papers, which combine
+reinforcement learning with simulator dependencies, bottom out
+at 5--8\%, reflecting how strongly final scores depend on
+factors outside the generated code.
+
+\paragraph{The component-to-benchmark gap.} The headline finding
+is the size of the gap between
+Figure~\ref{fig:iv_scores} and Figure~\ref{fig:repro_scores}:
+roughly 56 percentage points on average. Even after a framework
+succeeds at making code runnable and at implementing most of the
+right algorithmic components, the residual challenge of matching
+benchmark-level numbers remains large. Diagnosing why this gap
+is so wide is the central analysis remaining for the final
+version of this paper. \emph{[Reason for the gap: TBD.]}
 
 \section{Discussion}
 
