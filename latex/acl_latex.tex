@@ -14,7 +14,7 @@
 \usepackage{booktabs}
 \usepackage{enumitem}
 
-\title{Paper2Repro: Rubrics, Tests, and Runtime — Execution-Grounded Paper to Code Reproduction}
+\title{Paper2Repro: Execution-Grounded Paper to Code Reproduction}
 
 \author{Yanting Chi \\
   University of Minnesota \\
@@ -28,13 +28,13 @@
 \maketitle
 
 \begin{abstract}
-Automatic Generation of executable code from scientific papers is crutial
+Automatic generation of executable code from scientific papers is crucial
 for both research aim and the practical adoption of
-new methods in industry. Existing Paper to Code agents can produce
+new methods in industry. Existing paper-to-code agents can produce
 repositories that appear faithful and may score highly under
 LLM-as-a-judge evaluation, but such apparent quality does not
 ensure runnability or scientific reproducibility. We propose a
-rubric- and execution-guided Paper to Code framework that
+rubric- and execution-guided paper-to-code framework that
 verifies generated repositories through intermediate-value
 tests, runtime checks, and benchmark-level reproduction
 criteria. Our workflow parses papers into structured JSON,
@@ -45,7 +45,7 @@ task into a Harbor-style evaluation environment. On 22
 PaperBench papers, our prototype substantially improves
 runnability and reveals a large gap between executable
 repositories and scientifically reproducible repositories. These
-results suggest that Paper to Code evaluation should move beyond
+results suggest that paper-to-code evaluation should move beyond
 LLM-as-a-judge scores toward execution-grounded verification of
 algorithmic and experimental fidelity.
 \end{abstract}
@@ -66,7 +66,7 @@ the pace of scientific dissemination.
 Recent Large Language Models (LLMs) have shown strong capabilities in
 both understanding scientific text and generating code
 \citep{dubey2024llama, openai2024gpt4, reid2024gemini}, prompting a
-wave of Paper to Code agents that aim to translate a research paper
+wave of paper-to-code agents that aim to translate a research paper
 directly into an executable repository \citep{seo2025papercoder,
 starace2025paperbench, siegel2024corebench}. Systems such as
 PaperCoder \citep{seo2025papercoder} decompose this task into
@@ -86,15 +86,15 @@ understood the recipe, followed the correct procedure, or produced a
 dish with the expected taste. A judge that only inspects the plate
 cannot detect a missing ingredient, an inverted step, or a heat
 profile that differs from the original. The same holds for
-Paper to Code systems: a repository may use the wrong loss term, omit
+paper-to-code systems: a repository may use the wrong loss term, omit
 a key normalization, depend on an uninstalled package, or execute
 successfully yet fail to match the reported baseline. Existing
 benchmarks largely measure surface-level repository quality and do
 not separate these three properties, leaving open the question of
-whether current Paper to Code agents are reproducing science or
+whether current paper-to-code agents are reproducing science or
 merely producing code that resembles it.
 
-To address this gap, we propose that paper to code evaluation should
+To address this gap, we propose that paper-to-code evaluation should
 be \emph{execution-grounded} rather than \emph{appearance-based}, and
 we present a prototype framework that realizes this principle .
 Given a paper, the framework runs three parallel agents: a
@@ -122,14 +122,14 @@ We organize our investigation around three research questions:
     tests better identify algorithmic implementation errors than
     end-to-end output checks?
   \item[\textbf{RQ3}] Can static and runtime feedback meaningfully
-    improve generated paper to code repositories?
+    improve generated paper-to-code repositories?
 \end{description}
 
 \noindent We make three contributions. \emph{First}, we identify and
 characterize a gap between apparent repository quality, executability,
-and scientific reproducibility in current paper to code agents.
+and scientific reproducibility in current paper-to-code agents.
 \emph{Second}, we propose a rubric- and execution-guided workflow that
-decomposes paper to code reproduction into paper understanding, code
+decomposes paper-to-code reproduction into paper understanding, code
 generation, rubric and unit-test generation, runtime-information
 extraction, static amelioration, and TerminalBench-style task
 packaging. \emph{Third}, we evaluate the prototype on 22 papers from
@@ -143,7 +143,7 @@ refinement.
 
 \paragraph{Paper-to-code generation.} PaperCoder
 \citep{seo2025papercoder} is the closest baseline to our work.
-It decomposes paper to code into planning, analysis, and coding
+It decomposes paper-to-code into planning, analysis, and coding
 stages and shows that structured repository generation
 improves implementation quality over single-prompt baselines.
 However, PaperCoder's main evaluation centers on repository-level
@@ -156,7 +156,7 @@ amelioration loop intended to verify the generated repository
 against execution-grounded criteria.
 
 \paragraph{Reproduction benchmarks.} A growing body of work
-benchmarks paper to code systems and code-using agents.
+benchmarks paper-to-code systems and code-using agents.
 PaperBench \citep{starace2025paperbench} measures whether agents
 can reproduce machine-learning papers from scratch using
 hierarchical rubrics, and provides the papers we use in our
@@ -176,7 +176,7 @@ execution must be part of evaluation.
 \citep{tbench2025} evaluates agents on realistic terminal tasks
 using containerized environments, natural-language instructions,
 test suites, oracle solutions, and time limits. Our Harbor-style
-packaging adapts this evaluation philosophy to paper to code
+packaging adapts this evaluation philosophy to paper-to-code
 reproduction: the final artifact is not a static repository but a
 self-contained task that bundles paper, code, runtime
 specification, and tests.
@@ -217,7 +217,7 @@ arbitrary unit tests.
   extracts the structured runtime artifact $I$. The
   \textbf{amelioration} stage combines $C$, $U=(Q,V)$, and
   $I$ via a static loop (rubric-driven search--replace patches)
-  and a planned runtime run-and-fix loop (dashed) to yield the
+  and a planned runtime run-and-fix loop to yield the
   refined repository $C^{\star}$. The final \textbf{packaging}
   stage bundles $(R, C^{\star}, U, I)$ into a Harbor-style
   reproducibility task $B$ that can be replayed by external
@@ -250,9 +250,12 @@ S = (R',\,P,\,A,\,E),
 where $P$ is the planning trajectory, $A$ is the per-file analyses, and $E$ is a paper-grounded extraction containing algorithmic specifications, equations, datasets, baselines, and reported metrics. These artifacts are reused downstream by the rubric agent (for paper-grounded test design), the unit-test agent (for alignment with the planned implementation), and the runtime/dataset agent (for environment and dataset specifications). We note that $S$ is derived from $R'$, not from $C$; conditioning downstream agents on $S$ therefore does not implicitly relax the evaluation standard to whatever the coding agent happened to produce.
 
 Formally, given a paper $R$, we define
-\[
-\mathcal{M}_{\text{code}}(R) := \mathcal{M}_{\text{debug}} \circ \mathcal{M}_{\text{depcode}} \circ \mathcal{M}_{\text{ana}} \circ \mathcal{M}_{\text{plan}} \circ \mathcal{M}_{\text{pre}}(R) \to (C,\,S),
-\]
+\begin{equation*}
+\begin{aligned}
+\mathcal{M}_{\text{code}}(R) :={}& \mathcal{M}_{\text{debug}} \circ\, \mathcal{M}_{\text{depcode}} \circ\, \mathcal{M}_{\text{ana}} \\
+&\circ\, \mathcal{M}_{\text{plan}} \circ\, \mathcal{M}_{\text{pre}}(R) \to (C,\,S).
+\end{aligned}
+\end{equation*}
 where the four core substeps follow PaperCoder closely.
 
 \textbf{Planning.} The planning agent extracts an overall plan, an architecture design, a logic design, and an initial \texttt{config.yaml}, yielding $P = \mathrm{LLM}(\mathcal{T}_{\text{plan}}(R'))$.
@@ -289,18 +292,11 @@ where $I$ contains hardware requirements (e.g., GPU memory, CUDA version), packa
 
 \subsection{Code Running and Amelioration}
 
-The amelioration stage is intended to improve the repository using the rubric items in $U$, the runtime information in $I$, and execution feedback. Formally,
-\begin{equation*}
-\begin{aligned}
-\mathcal{M}_{\text{code}}(R) :={}& \mathcal{M}_{\text{debug}}\circ\, \mathcal{M}_{\text{depcode}}\circ\, \mathcal{M}_{\text{ana}} \\
-&\circ\, \mathcal{M}_{\text{plan}} \circ\, \mathcal{M}_{\text{pre}}(R)\to (C,\,S).
-\end{aligned}
-\end{equation*}
-which we instantiate through two coordinated sub-loops, of which the first is currently complete and the second is partially in place.
+The amelioration stage is intended to improve the repository using the rubric items in $U$, the runtime information in $I$, and execution feedback. 
 
-\textbf{Static amelioration loop (implemented).} The static loop takes the generated repository together with the paper-specific rubric and checks code-development items that can be judged without execution---for instance, that the loss function contains a required penalty term, that the configuration file uses the correct hyperparameter, or that a named module exists at the expected location. When a rubric item fails, the LLM proposes minimal search--replace patches and the loop iterates. Many reproduction errors are visible in source code and can be corrected cheaply at this stage, before any training run is launched.
+\textbf{Static amelioration loop.} The static loop takes the generated repository together with the paper-specific rubric and checks code-development items that can be judged without execution---for instance, that the loss function contains a required penalty term, that the configuration file uses the correct hyperparameter, or that a named module exists at the expected location. When a rubric item fails, the LLM proposes minimal search--replace patches and the loop iterates. Many reproduction errors are visible in source code and can be corrected cheaply at this stage, before any training run is launched.
 
-\textbf{Runtime run-and-fix loop } The full runtime loop, which we describe as the intended next step, should: (1) read $I$; (2) build or configure the environment; (3) download datasets and baselines; (4) run \texttt{reproduce.sh}; (5) execute the generated \texttt{pytest} suite $V$; (6) read \texttt{scores/scores.json}; (7) feed failing tests and logs back to the debugger $\mathcal{M}_{\text{debug}}$; and (8) patch and rerun until tests pass or the iteration cap is reached. The current codebase contains most components in isolation: dataset downloading, debugging via search--replace patches, unit-test execution, and Harbor packaging.
+\textbf{Runtime run-and-fix loop } The full runtime loop should: (1) read $I$; (2) build or configure the environment; (3) download datasets and baselines; (4) run \texttt{reproduce.sh}; (5) execute the generated \texttt{pytest} suite $V$; (6) read \texttt{scores/scores.json}; (7) feed failing tests and logs back to the debugger $\mathcal{M}_{\text{debug}}$; and (8) patch and rerun until tests pass or the iteration cap is reached. The current codebase contains most components in isolation: dataset downloading, debugging via search--replace patches, unit-test execution, and Harbor packaging.
 
 
 
@@ -581,7 +577,7 @@ amelioration of model code.
 
 \textbf{Formal ablations.} Important ablations include removing
 intermediate-value tests, removing static amelioration, removing
-runtime feedback, and comparing against a PaperCoder-only
+runtime feedback, and comparing against a PaperRepro-only
 baseline under matched conditions. These ablations would
 quantify the contribution of each component of the framework.
 
@@ -594,10 +590,10 @@ execution-grounded evaluation.
 
 \section{Conclusion}
 
-PaperCoder asks whether an LLM can generate a faithful-looking
+PaperRepro asks whether an LLM can generate a faithful-looking
 repository from a paper. Terminal-Bench asks whether an agent can
 solve realistic terminal tasks under tests. Our project sits
-between the two and asks whether a Paper to Code system can
+between the two and asks whether a paper-to-code system can
 generate a repository that not only looks good, but also runs
 and satisfies paper-specific scientific reproduction tests. We
 present a rubric- and execution-guided framework that turns a
@@ -606,7 +602,7 @@ intermediate-value tests, runtime requirements, and a Harbor-style
 reproducibility task. On 22 PaperBench papers, the prototype
 substantially improves runnability and exposes a large gap between
 executable and scientifically reproducible repositories. We view
-this as evidence that Paper to Code evaluation should move beyond
+this as evidence that paper-to-code evaluation should move beyond
 LLM-as-a-judge scores toward execution-grounded verification of
 algorithmic and experimental fidelity.
 
