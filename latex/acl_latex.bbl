@@ -1,0 +1,129 @@
+\begin{thebibliography}{16}
+\providecommand{\natexlab}[1]{#1}
+
+\bibitem[{Baker(2016)}]{baker20161}
+Monya Baker. 2016.
+\newblock \href {https://doi.org/10.1038/533452a} {1,500 scientists lift the
+  lid on reproducibility}.
+\newblock \emph{Nature}, 533(7604):452--454.
+
+\bibitem[{Brown et~al.(2024)Brown, Juravsky, Ehrlich, Clark, Le, R{\'e}, and
+  Mirhoseini}]{brown2024largelanguagemonkeys}
+Bradley Brown, Jordan Juravsky, Ryan Ehrlich, Ronald Clark, Quoc~V. Le,
+  Christopher R{\'e}, and Azalia Mirhoseini. 2024.
+\newblock \href {https://arxiv.org/abs/2407.21787} {Large language monkeys:
+  Scaling inference compute with repeated sampling}.
+\newblock \emph{arXiv preprint arXiv:2407.21787}.
+
+\bibitem[{Chen et~al.(2023)Chen, Lin, Sch{\"a}rli, and
+  Zhou}]{chen2023selfdebug}
+Xinyun Chen, Maxwell Lin, Nathanael Sch{\"a}rli, and Denny Zhou. 2023.
+\newblock \href {https://arxiv.org/abs/2304.05128} {Teaching large language
+  models to self-debug}.
+\newblock \emph{arXiv preprint arXiv:2304.05128}.
+
+\bibitem[{Dubey et~al.(2024)Dubey, Jauhri, Pandey, Kadian, Al-Dahle, Letman,
+  Mathur, Schelten, Yang, Fan et~al.}]{dubey2024llama}
+Abhimanyu Dubey, Abhinav Jauhri, Abhinav Pandey, Abhishek Kadian, Ahmad
+  Al-Dahle, Aiesha Letman, Akhil Mathur, Alan Schelten, Amy Yang, Angela Fan,
+  and 1 others. 2024.
+\newblock \href {https://arxiv.org/abs/2407.21783} {The {Llama} 3 herd of
+  models}.
+\newblock \emph{arXiv preprint arXiv:2407.21783}.
+
+\bibitem[{Hu et~al.(2025)Hu, Zhang, Lim, Wadhwani, Peters, and
+  Kang}]{hu2025reprobench}
+Chuxuan Hu, Liyun Zhang, Yeji Lim, Aum Wadhwani, Austin Peters, and Daniel
+  Kang. 2025.
+\newblock \href {https://doi.org/10.18653/v1/2025.findings-acl.1210}
+  {Repro-bench: Can agentic ai systems assess the reproducibility of social
+  science research?}
+\newblock In \emph{Findings of the Association for Computational Linguistics:
+  ACL 2025}, pages 23616--23626. Association for Computational Linguistics.
+
+\bibitem[{{Open Science Collaboration}(2015)}]{collaboration2015estimating}
+{Open Science Collaboration}. 2015.
+\newblock \href {https://doi.org/10.1126/science.aac4716} {Estimating the
+  reproducibility of psychological science}.
+\newblock \emph{Science}, 349(6251):aac4716.
+
+\bibitem[{{OpenAI}(2024)}]{openai2024gpt4}
+{OpenAI}. 2024.
+\newblock \href {https://arxiv.org/abs/2303.08774} {{GPT-4} technical report}.
+\newblock \emph{arXiv preprint arXiv:2303.08774}.
+
+\bibitem[{Pineau et~al.(2021)Pineau, Vincent-Lamarre, Sinha, Lariviere,
+  Beygelzimer, d'Alche Buc, Fox, and Larochelle}]{pineau2021improving}
+Joelle Pineau, Philippe Vincent-Lamarre, Koustuv Sinha, Vincent Lariviere,
+  Alina Beygelzimer, Florence d'Alche Buc, Emily Fox, and Hugo Larochelle.
+  2021.
+\newblock \href {https://jmlr.org/papers/v22/20-303.html} {Improving
+  reproducibility in machine learning research: A report from the {NeurIPS}
+  2019 reproducibility program}.
+\newblock \emph{Journal of Machine Learning Research}, 22(164):1--20.
+
+\bibitem[{Reid et~al.(2024)Reid, Savinov, Teplyashin, Lepikhin, Lillicrap,
+  Alayrac, Soricut, Lazaridou, Firat, Schrittwieser et~al.}]{reid2024gemini}
+Machel Reid, Nikolay Savinov, Denis Teplyashin, Dmitry Lepikhin, Timothy~P.
+  Lillicrap, Jean-Baptiste Alayrac, Radu Soricut, Angeliki Lazaridou, Orhan
+  Firat, Julian Schrittwieser, and 1 others. 2024.
+\newblock \href {https://doi.org/10.48550/arXiv.2403.05530} {{Gemini} 1.5:
+  Unlocking multimodal understanding across millions of tokens of context}.
+\newblock \emph{arXiv preprint arXiv:2403.05530}.
+
+\bibitem[{Seo et~al.(2025)Seo, Baek, Lee, and Hwang}]{seo2025papercoder}
+Minju Seo, Jinheon Baek, Seongyun Lee, and Sung~Ju Hwang. 2025.
+\newblock \href {https://arxiv.org/abs/2504.17192} {Paper2code: Automating code
+  generation from scientific papers in machine learning}.
+\newblock \emph{arXiv preprint arXiv:2504.17192}.
+
+\bibitem[{Siegel et~al.(2024{\natexlab{a}})Siegel, Kapoor, Nadgir, Stroebl, and
+  Narayanan}]{siegel2024corebench}
+Zachary~S. Siegel, Sayash Kapoor, Nitya Nadgir, Benedikt Stroebl, and Arvind
+  Narayanan. 2024{\natexlab{a}}.
+\newblock \href {https://openreview.net/forum?id=BsMMc4MEGS} {Core-bench:
+  Fostering the credibility of published research through a computational
+  reproducibility agent benchmark}.
+\newblock \emph{Transactions on Machine Learning Research}.
+
+\bibitem[{Siegel et~al.(2024{\natexlab{b}})Siegel, Kapoor, Nadgir, Stroebl, and
+  Narayanan}]{corebench2024}
+Zachary~S Siegel, Sayash Kapoor, Nitya Nadgir, Benedikt Stroebl, and Arvind
+  Narayanan. 2024{\natexlab{b}}.
+\newblock \href {https://arxiv.org/abs/2409.11363} {Core-bench: Fostering the
+  credibility of published research through a computational reproducibility
+  agent benchmark}.
+\newblock \emph{arXiv preprint arXiv:2409.11363}.
+
+\bibitem[{{Stanford and Anthropic}(2025)}]{tbench2025}
+{Stanford and Anthropic}. 2025.
+\newblock Terminal-bench: A benchmark for ai agents in terminal environments.
+\newblock \url{https://www.tbench.ai/}.
+\newblock TODO: replace with canonical citation when available.
+
+\bibitem[{Starace et~al.(2025)Starace, Jaffe, Sherburn, Aung, Chan, Maksin,
+  Dias, Mays, Kinsella, Thompson, Heidecke, Glaese, and
+  Patwardhan}]{starace2025paperbench}
+Giulio Starace, Oliver Jaffe, Dane Sherburn, James Aung, Jun~Shern Chan, Leon
+  Maksin, Rachel Dias, Evan Mays, Benjamin Kinsella, Wyatt Thompson, Johannes
+  Heidecke, Amelia Glaese, and Tejal Patwardhan. 2025.
+\newblock \href {https://arxiv.org/abs/2504.01848} {Paperbench: Evaluating ai's
+  ability to replicate ai research}.
+\newblock \emph{arXiv preprint arXiv:2504.01848}.
+
+\bibitem[{Tian et~al.(2024)Tian, Ye, Qin, Cong, Lin, Pan, Wu, Hui, Liu, Liu,
+  and Sun}]{zhong2024debugbench}
+Runchu Tian, Yining Ye, Yujia Qin, Xin Cong, Yankai Lin, Yinxu Pan, Yesai Wu,
+  Haotian Hui, Weichuan Liu, Zhiyuan Liu, and Maosong Sun. 2024.
+\newblock \href {https://arxiv.org/abs/2401.04621} {Debugbench: Evaluating
+  debugging capability of large language models}.
+\newblock \emph{arXiv preprint arXiv:2401.04621}.
+
+\bibitem[{Xiang et~al.(2025)Xiang, Yan, Ouyang, Gui, and He}]{scireplicate2024}
+Yanzheng Xiang, Hanqi Yan, Shuyin Ouyang, Lin Gui, and Yulan He. 2025.
+\newblock \href {https://arxiv.org/abs/2504.00255} {Scireplicate-bench:
+  Benchmarking llms in agent-driven algorithmic reproduction from research
+  papers}.
+\newblock \emph{arXiv preprint arXiv:2504.00255}.
+
+\end{thebibliography}

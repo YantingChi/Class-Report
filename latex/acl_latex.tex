@@ -1,3 +1,6 @@
+% Builds the ACL-style Paper2Repro class report with pdfLaTeX.
+% Usage: cd latex && latexmk -pdf -interaction=nonstopmode -file-line-error acl_latex.tex
+% User-editable settings: change the document class option, ACL mode, title, and authors below.
 \documentclass[11pt]{article}
 \usepackage{amsmath}
 
@@ -9,10 +12,28 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{microtype}
-\usepackage{inconsolata}
+\IfFileExists{inconsolata.sty}{%
+  \usepackage{inconsolata}%
+}{%
+  \usepackage{courier}%
+}
 \usepackage{graphicx}
+% Figures are stored at the repository root; latexmk is run from this directory.
+\graphicspath{{../}{./}}
 \usepackage{booktabs}
 \usepackage{enumitem}
+\usepackage{listings}
+
+% Listing style for appendix unit-test examples.
+% Usage: wrap short Python snippets in \begin{lstlisting}[language=Python] ... \end{lstlisting}.
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single
+}
 
 \title{Paper2Repro: Execution-Grounded Paper to Code Reproduction}
 
@@ -328,6 +349,135 @@ these numbers as a sanity check on the framework rather than as
 a final evaluation; absolute values are likely to shift once the
 runtime run-and-fix loop is completed and dataset and baseline
 retrieval mature.
+\subsection{Generated Repo Details}
+
+To probe how closely generated repositories obey the paper that
+produced them, we compared three Paper2Repro outputs against their
+corresponding papers, rubrics, and official reference repositories:
+BaM, APT (Adaptive Pruning and Tuning), and BBOX-ADAPTER. The
+reference repositories are used as a behavioral calibration target,
+not as a strict file-template oracle. Scores are rubric-weighted
+implementation-faithfulness estimates, so they reflect both code
+coverage and evidence that the paper's experiments were actually
+reproduced. Table~\ref{tab:three_repo_summary} gives the headline
+numbers, and the paragraphs below discuss each repository in turn.
+
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{lcc p{0.30\linewidth} p{0.28\linewidth}}
+\toprule
+\textbf{Paper} & \textbf{Score} & \textbf{Leaves} &
+\textbf{Implementation profile} & \textbf{Paper faithfulness} \\
+\midrule
+BaM & 0.308 & 789
+& Strongest on core variational-inference algorithms; weak on
+executed experiments and real PosteriorDB/deep-generative
+reproduction.
+& Partially faithful: the main algorithmic logic is present, but
+paper-scale evidence is mostly missing. \\
+APT & 0.246 & 123
+& Coherent adaptive-pruning framework with masks, salience scoring,
+dynamic ranks, and training utilities; empirical evidence is
+minimal.
+& Weakly faithful: captures the broad APT idea, but diverges on
+several paper-critical details and lacks reported paper results. \\
+BBOX-ADAPTER & 0.290 & 279
+& Modular black-box adapter pipeline with pair scoring, online
+stores, NCE-style training, reranking, and beam search; configs and
+results are incomplete.
+& Partially faithful: architecture is recognizable, but
+training/evaluation details and reproduced tables are largely
+absent. \\
+\bottomrule
+\end{tabular}
+\caption{Rubric-weighted summary of three generated repositories.
+``Score'' is the weighted implementation-faithfulness estimate over
+the rubric leaves produced for that paper; ``Leaves'' is the number
+of leaf rubric items used to compute it.}
+\label{tab:three_repo_summary}
+\end{table*}
+
+\paragraph{BaM: Batch and Match.} The BaM repository is the strongest
+of the three in terms of core mathematical logic. It implements BaM,
+ADVI, Score-VI, Fisher-VI, and GSM-style algorithms with
+full-covariance Gaussian variational families, synthetic target
+distributions, per-iteration metrics, and shared experiment
+infrastructure. This matches the paper's central claim that BaM is a
+score-divergence-based black-box variational inference method with
+closed-form Gaussian-family updates. Most paper-obedience gaps lie in
+experimental detail rather than the algorithm skeleton: there is no
+committed evidence of the required long seeded runs, grid-search
+sweeps, final figures, or reproduced quantitative results. PosteriorDB
+support is mostly generic scaffolding---target-specific log-posterior
+and score functions for the paper's models are absent or replaced by
+toy mechanisms---and the deep generative experiment is partial, with
+CIFAR loading, VAE-style code, posterior scoring, and reconstruction
+metrics in place but no trained decoder artifacts or completed
+reconstruction outputs. BaM therefore obeys the paper at the level of
+method structure, but not at the level of full experimental
+reproduction.
+
+\paragraph{APT: Adaptive Pruning and Tuning.} The APT repository
+implements a plausible adaptive-pruning system. It contains an
+APT-like adapter layer with frozen base weights, input/output masks,
+dynamic rank expansion, salience-density pruning, rank allocation,
+two-stage training, distillation scaffolding, evaluation utilities,
+and RoBERTa/T5 configurations that encode many paper hyperparameters,
+making the repository recognizable as an implementation of the
+paper's high-level idea: adaptively tune salient parameters while
+pruning unimportant structure to improve training and inference
+efficiency. The main weaknesses are paper-critical details: baselines
+are local proxies rather than the specified Mask Tuning and CoFiPruning
+implementations, and several method details diverge from the paper or
+reference behavior, including effective adapter scaling, multi-head
+attention mask indexing, outlier salience, Equation-9-style adapter
+salience, layer mapping for distillation, and KL prediction
+distillation. The empirical side is especially weak: the only observed
+run is a toy tiny-random RoBERTa SST-2 run with no pruning, while the
+paper requires 60\% sparsity experiments, relative accuracy analysis,
+efficiency claims, and ablations. APT therefore captures the broad
+engineering direction of the paper, but does not obey it closely on
+detailed mechanics or experimental evidence.
+
+\paragraph{BBOX-ADAPTER.} The BBOX-ADAPTER repository contains a
+substantial adaptation pipeline: scalar question--answer pair scoring,
+ranking/NCE-style adapter training, online positive/negative example
+storage, single-step reranking, sentence-level full-step beam search,
+dataset preparation, and metric utilities. It also recognizes several
+important paper settings from Appendix~H.2, including maximum
+generation length 512, temperature 1.0, learning rate $5\!\times\!10^{-6}$,
+batch size 64, 6000 training steps, AdamW, and beam size 3. Dataset
+manifests show materialized GSM8K, StrategyQA, TruthfulQA, and
+text-only ScienceQA splits. The repository nonetheless falls short of
+paper-faithful reproduction: there are no committed adapter
+checkpoints, training logs, evaluation summaries, or reproduced
+numbers for the paper's main tables; the default configuration is not
+runnable as-is because config keys expected by the loader do not match
+the provided YAML; the ranking loss path has an indentation bug
+affecting \texttt{RankingNCELoss.forward}; and the Equation~3 score
+regularizer is effectively disabled by default because the
+$\alpha$ value is not resolved from the expected configuration
+location. Several paper components---MLM ablation, fine-tuning
+baselines, plug-and-play results, cost trends, and the Mixtral
+white-box extension---are stubs or planned aggregations rather than
+completed experiments.
+
+\paragraph{Cross-paper interpretation.} Across all three repositories,
+the dominant pattern is the same: generated code often captures the
+high-level method and implements plausible scaffolding, but falls
+short on paper-specific detail and experimental proof. BaM is most
+convincing on core algorithmic logic; APT is most coherent as an
+engineering framework for pruning and tuning, yet shows the largest
+gap between method scaffold and paper-scale results; BBOX-ADAPTER
+has the broadest pipeline for a black-box LLM adaptation workflow,
+but suffers from configuration and loss-path issues that make
+reproducibility fragile. These comparisons argue that generated
+repositories should be treated as starting points for reproduction
+rather than as faithful reproductions of the papers themselves:
+useful for studying how much of a method an automated coding system
+can reconstruct, but requiring substantial human correction before
+they can support paper-level empirical claims.
 
 \subsection{Paper2Code vs.\ Paper2Repro}
 
@@ -623,10 +773,143 @@ and the planned runtime run-and-fix loop.
 \section{Generated Test Examples}
 \label{sec:appendix-tests}
 
-For space, we omit full listings of generated rubrics and
-\texttt{pytest} files. A representative example for BE-CBO,
-together with the corresponding patches produced by the static
-amelioration loop, is included with the project's supplementary
-materials.
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{Fig/category_counts_xfail_as_fail.png}
+\caption{Distribution of generated PaperBench-style tests across
+six rubric categories for adaptive pruning, BAM, and BBox. Tests
+marked with \texttt{xfail} are counted as failures rather than
+being removed, while explicit \texttt{pytest.skip} cases are
+reported separately. The figure shows that the generated suites
+are dominated by expected-failing rubric checks, especially in
+method, asset, and result-reproduction categories, which supports
+our claim that execution-grounded paper-to-code evaluation must
+distinguish ordinary passing tests from qualitative smoke checks
+and incomplete reproduction tests.}
+\label{fig:xfail-category-counts}
+\end{figure*}
+
+This section gives one representative generated unit test for
+each rubric category used in Figure~\ref{fig:xfail-category-counts}.
+The examples are intentionally short: they illustrate the type of
+evidence encoded by each category, not the full generated test
+suite.
+
+\paragraph{Environment, data, and assets.}
+This BAM test checks that the JAX dependency is usable at a basic
+array-operation level.
+\begin{lstlisting}[language=Python]
+@pytest.mark.xfail(
+    strict=False,
+    reason="qualitative requirement; smoke test",
+)
+@pytest.mark.rubric(
+    test_id="T-0001",
+    rubric_id="env_jax",
+    weight=1,
+    tier="intermediate",
+)
+def test_env_jax():
+    out = jnp.ones((2, 3)).shape
+    assert tuple(out) == (2, 3)
+\end{lstlisting}
+
+\paragraph{Core method implementation.}
+This BBox Adapter test checks a concrete invariant of the
+energy-based formulation: normalized probabilities sum to one.
+\begin{lstlisting}[language=Python]
+@pytest.mark.rubric(
+    test_id="T-0012",
+    rubric_id="impl_ebm_formulation",
+    weight=1,
+    tier="intermediate",
+)
+def test_impl_ebm_formulation():
+    out = sum(ebm_normalized_probs(scores=[0.0, 0.0, 0.0],
+                                   log_p_llm=[0.0, 0.0, 0.0]))
+    assert out == 1.0
+\end{lstlisting}
+
+\paragraph{Baselines and metrics.}
+This BAM test verifies that the metric entrypoints needed for
+paper-level comparisons are present and callable.
+\begin{lstlisting}[language=Python]
+@pytest.mark.xfail(
+    strict=False,
+    reason="qualitative requirement; smoke test",
+)
+@pytest.mark.rubric(
+    test_id="T-0019",
+    rubric_id="impl_metrics",
+    weight=2,
+    tier="intermediate",
+)
+def test_metrics_callable():
+    for metric in [
+        exact_gaussian_kls,
+        compute_posterior_stats_metrics,
+        reconstruction_mse,
+    ]:
+        assert callable(metric)
+\end{lstlisting}
+
+\paragraph{Experimental protocols and hyperparameters.}
+This adaptive-pruning test directly checks that the small-model
+inference batch size matches the value specified by the paper.
+\begin{lstlisting}[language=Python]
+@pytest.mark.rubric(
+    test_id="T-0020",
+    rubric_id="hp_infer_bs_small_128",
+    weight=1,
+    tier="intermediate",
+)
+def test_infer_bs_small_128():
+    out = EvalConfig().inference_batch_size_small
+    assert out == 128.0
+\end{lstlisting}
+
+\paragraph{Experiment execution.}
+This BBox test checks that the StrategyQA training and evaluation
+entrypoints exist, but it does not by itself prove that the full
+experiment has been run.
+\begin{lstlisting}[language=Python]
+@pytest.mark.xfail(
+    strict=False,
+    reason="qualitative requirement; smoke test",
+)
+@pytest.mark.rubric(
+    test_id="T-0026",
+    rubric_id="run_bbox_adapter_strategyqa",
+    weight=1,
+    tier="intermediate",
+)
+def test_bbox_strategyqa_entrypoints():
+    assert callable(run_train)
+    assert callable(run_eval)
+\end{lstlisting}
+
+\paragraph{Result reproduction and comparison.}
+This BAM test corresponds to a reported figure, but only checks
+that the plotting entrypoint exists; stronger evidence would
+compare generated result files against the paper's reported
+numbers or trends.
+\begin{lstlisting}[language=Python]
+@pytest.mark.xfail(
+    strict=False,
+    reason="qualitative requirement; smoke test",
+)
+@pytest.mark.rubric(
+    test_id="T-0043",
+    rubric_id="verify_fig_5_1",
+    weight=1,
+    tier="intermediate",
+)
+def test_fig_plotter_entrypoint():
+    out = hasattr(
+        Plotter,
+        "plot_metric_trajectories",
+    )
+    assert out is True
+\end{lstlisting}
 
 \end{document}
