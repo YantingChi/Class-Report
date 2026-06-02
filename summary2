@@ -1,0 +1,337 @@
+<!--
+codebase_evolution_summary.md
+
+What this file does:
+  A self-contained, ML-paper-style technical report characterizing HOW the
+  reproduced codebase is transformed at each stage of the Paper2Code pipeline
+  (paper -> plan -> codebase -> +dataset runner -> iteratively-fixed -> docker).
+  Every quantitative claim and code listing is grounded in two real snapshots of
+  the `all-in-one` reproduction and was verified with `diff`/`find`/`wc`.
+
+How to read it:
+  Read the Abstract and Figure 1 first. Section 3 formalizes the per-stage
+  codebase transformation; Section 4 is the running case study; Section 5 reports
+  the verified diff statistics (Tables 2-3).
+
+Reproducibility — the evidence snapshots (paths you can re-diff):
+  STAGE3_SNAPSHOT  = outputs/paperbench_subrepos/all-in-one/stage3_11    (after coding)
+  STAGE81_SNAPSHOT = outputs/paperbench_subrepos/all-in-one/stage8.1_11  (after repair)
+  HARBOR_TASK      = tests/harbor/all-in-one/                            (containerized task)
+  Re-verify Table 2/3:  diff -rq $STAGE3_SNAPSHOT $STAGE81_SNAPSHOT
+-->
+
+# From Paper to Container: A Stage-wise Characterization of Codebase Evolution in an Automated Reproduction Pipeline
+
+**A technical report on the Paper2Code reproduction system, with a verified case study on the *all-in-one* simulation-based-inference paper.**
+
+---
+
+## Abstract
+
+Automated paper-reproduction pipelines convert a research paper into an executable, gradeable codebase through a sequence of generation and repair stages. While such pipelines are usually described by *what they output*, the more useful question for understanding and debugging them is *how the codebase itself is transformed at each stage*. We give a stage-wise characterization of these transformations across the five phase-groups of the Paper2Code pipeline — **planning, synthesis, runner integration, rubric-driven repair, and test synthesis & containerization** — and we ground every claim in two real snapshots of the same reproduction. Our central empirical finding is that the repository's *structure* is established almost entirely by the early **synthesis** and **runner-integration** stages, whereas the later **repair** stage is overwhelmingly *content-rewriting*: between the post-synthesis and post-repair snapshots of the *all-in-one* reproduction, the file count is unchanged (164 → 164), no net source files are added, and the entire delta is **+415 / −163 lines (net +252) across 15 edited files**, accompanied by 16 non-destructive backup snapshots. We further catalog the *side artifacts* each stage emits (evaluation plan, rubric, unit tests, container task) and distill four recurring design principles: equation-literal synthesis, stub-then-implement baselines, grader-independent rubric repair, and non-destructive editing.
+
+---
+
+## 1. Introduction
+
+A reproduction pipeline takes a paper $P$ and emits an artifact $R$ that a grader can execute and score. Internally, $R$ is not produced in one shot; it is the fixed point of a sequence of transformations $R_0 \to R_1 \to \dots \to R_n$, where each stage either (i) **mutates the repository** (adds files or rewrites file contents) or (ii) **emits a side artifact** (a plan, a rubric, a container descriptor) that conditions later mutations. Understanding a pipeline therefore means understanding this transformation sequence — which stage *creates structure*, which stage *fills in behavior*, and which stage merely *packages*.
+
+This report provides such an understanding for the Paper2Code pipeline. We make three contributions:
+
+1. **A stage-wise transformation taxonomy (Section 3).** For each of the five phase-groups we specify its objective, its mechanism, and — precisely — its effect on the repository: whether it adds files, rewrites existing files, or only emits side artifacts.
+2. **A verified case study (Sections 4–5).** Using two real snapshots of the *all-in-one* reproduction, we exhibit the actual before/after code at every stage and report exact, re-checkable diff statistics.
+3. **A set of design principles (Section 6).** We identify four invariants that recur across stages and explain the pipeline's behavior, most notably that repair is *grader-independent* and *non-destructive*.
+
+**Running example.** Throughout, we use the reproduction of *"All-in-one simulation-based inference"* (hereafter *all-in-one*), a diffusion-based SBI method evaluated on four SBIBM benchmark tasks against four neural-SBI baselines (NLE, NPE, NPSE, NRE). It is a representative case: the method is equation-heavy, the evaluation requires rival baselines and generated datasets, and the reproduction passes through every stage of the pipeline.
+
+---
+
+## 2. Pipeline overview
+
+```
+                 ┌─────────────┐
+   paper ──▶ (1,2) Plan  ──▶ (3) Codebase ──▶ (5,5.1,6,8.2) Codebase ──▶ (7,8,8.1) Iteratively ──▶ (9a,9b,10) Codebase
+                 blueprints      repo born      + dataset runner            -fixed codebase           in Docker
+                 (no code)       all files      data/metrics/baselines      in-place repair           tests + container
+                                 written        wired (stubs)               (content rewrite)         (package only)
+
+         side artifacts:  plan/analysis     —     eval_plan.json   rubric.json    test_specs.json   task.toml/Dockerfile
+```
+**Figure 1.** The five phase-groups. Boxes are repository states $R_i$; the bottom row lists the side artifact each stage emits. Two of the five stages (*Plan*, the rubric half of *Repair*) emit only side artifacts; the rest mutate the repository.
+
+A useful coarse distinction (formalized per-stage in Section 3 and summarized in Table 1) is between three mutation types:
+
+- **CREATE** — files that did not exist are written (structure appears).
+- **REWRITE** — existing files are edited in place (behavior changes, structure stable).
+- **PACKAGE / SPEC** — the repository source is untouched; the stage emits a side artifact or wraps the repo.
+
+| Stage (phases) | Primary mutation | What appears in the repo | Side artifact emitted |
+|---|---|---|---|
+| Plan (1, 2) | SPEC | — (nothing yet) | plan, architecture, per-file analysis, config template |
+| Codebase (3) | **CREATE** | entire source tree, deps, config | coding traces |
+| + Dataset runner (5, 5.1, 6, 8.2) | **CREATE** | data-prep, metrics, dataset/baseline configs, baseline-runner modules (stubs), downloaded assets | `eval_plan.json` (datasets/baselines + feasibility) |
+| Iteratively-fixed (7, 8, 8.1) | **REWRITE** | (no new source files; backups only) | reproduction rubric + Paper2Code rubric tree |
+| In Docker (9a, 9b, 10) | CREATE (tests) + PACKAGE | unit-test suite, then container bundle | `test_specs.json`, `task.toml`, `Dockerfile` |
+
+**Table 1.** Per-stage mutation type and emitted artifacts. Only two stages create *behavioral* source structure (Codebase, Dataset runner); the Repair stage is structurally stable by design.
+
+---
+
+## 3. Method: stage-wise codebase transformation
+
+We adopt a uniform schema for each stage: **Objective** (what it is for), **Mechanism** (how it works), **Effect on the codebase** (the precise mutation), and a **Listing** showing the real before/after for *all-in-one*.
+
+### 3.1 Plan (phases 1–2)
+
+**Objective.** Produce the blueprint that conditions all later code generation, without writing any source code.
+
+**Mechanism.** The paper is read and distilled into: an overall reproduction plan, an architecture decision (the set of files that will exist and their responsibilities), a configuration template, and a per-file logic analysis. Crucially, every equation in the paper is extracted and recorded so its literal presence can be checked after synthesis.
+
+**Effect on the codebase.** None — this is a **SPEC** stage. The repository $R_0$ is empty; the outputs are planning side artifacts that become the authoritative context for §3.2.
+
+**Listing 1.** The blueprint seeds, but does not yet write, the eventual configuration and file set.
+```
+BEFORE: ∅  (no repository exists)
+
+AFTER (planning side artifacts → later materialized as config.yaml):
+  task:
+    name: lotka_volterra
+    simulator: { sigma: 0.1, ... }
+  # planned file set: main.py, src/simulators/lotka_volterra.py,
+  #                   src/diffusion/guidance.py, src/baselines/*, ...
+```
+
+### 3.2 Codebase (phase 3)
+
+**Objective.** Materialize the entire planned codebase as complete, runnable code.
+
+**Mechanism.** Every file in the planned task list is generated as finished code (no `TODO` stubs): the main entry-point module, the per-component modules, a requirements file pinning package versions, and a configuration file. Paper equations are emitted *literally* — coefficients appear as numeric constants rather than free parameters — and a bounded self-verification step may regenerate a file at most once if a required equation is found missing.
+
+**Effect on the codebase.** **CREATE** at maximum scale: this is the moment $R_1$ comes into existence. For *all-in-one*, $R_1$ already contains **164 source files (~51k Python LOC)** — essentially the full structural footprint that persists to the end of the pipeline.
+
+**Listing 2.** A core module is created from nothing.
+```python
+BEFORE: ∅  (file does not exist)
+
+AFTER: src/simulators/lotka_volterra.py
+  """Lotka-Volterra simulator with irregular observations for Simformer.
+  Paper-aligned properties implemented here:
+  - 4 global parameters
+  - classical predator-prey ODE dynamics
+  - Gaussian observation noise with sigma=0.1 from `config.yaml`
+  - irregular and species-specific observation times
+  Implemented default reconstruction assumptions:
+  - scaled sigmoid transform to (1, 3): 1 + 2 * sigmoid(z)
+  - initial prey population = 1.0
+  """
+```
+
+### 3.3 Codebase with dataset runner (phases 5, 5.1, 6, 8.2)
+
+**Objective.** Make the synthesized code *executable against real data and rival methods*.
+
+**Mechanism.** First, an **evaluation plan** is produced: a catalog of the datasets and baseline methods the paper uses, each annotated with a feasibility decision (fits within the hardware/storage budget; in scope). Conditioned on that plan, the repository is then grown with the supporting machinery — data-preparation scripts, metric code, and dataset/baseline configuration files — and the real datasets and rival repositories are fetched into an assets area. Finally, a set of **baseline-runner modules** is added behind a single dispatch table, so any rival can be invoked through one entry point. These runners are first wired as *stubs* (delegating to a bundled fallback) and smoke-tested, deferring faithful implementation to the repair stage.
+
+**Effect on the codebase.** **CREATE** of the runtime/evaluation layer: new infrastructure files and a `src/baselines/` package. Behavior at this point is intentionally incomplete (stubs).
+
+**Listing 3.** The baseline dispatch table is created, and each rival is wired as a stub.
+```python
+BEFORE: ∅  (no src/baselines/)
+
+AFTER: src/baselines/__init__.py        # dispatch table
+  _BASELINE_SLUGS = ['nle', 'npe', 'npse', 'nre', 'simformer_posterior_only']
+  def run_baseline_for(slug, dataset, config=None):
+      module = importlib.import_module(f"src.baselines.{slug}")
+      return module.run_baseline(dataset, config)
+
+AFTER: src/baselines/nle.py             # initial STUB (bundled fallback)
+  def run_baseline(dataset, config=None):
+      from src.baselines.simformer_posterior_only import _run_repo_baseline
+      overrides = dict(config or {}); overrides["mask_mode"] = "posterior"
+      return _run_repo_baseline(dataset=dataset, config=overrides)
+```
+
+### 3.4 Iteratively-fixed codebase (phases 7, 8, 8.1)
+
+**Objective.** Bring the executable-but-incomplete code into faithful agreement with the paper.
+
+**Mechanism.** The paper is first distilled into a **rubric**: a checklist of testable requirements ("is this method actually implemented?", "is this exact hyperparameter present?"). The repair loop then walks the rubric against the code and edits the offending files *in place*, keeping a numbered backup of every file it touches. Two properties are deliberate: edits are **non-destructive** (code is rewritten, never deleted), and the loop is driven by the *paper + rubric*, **not** by the grading harness — so fixes generalize rather than overfitting the grader.
+
+**Effect on the codebase.** **REWRITE**, structurally stable. The file tree does not grow (modulo `.bak` snapshots); the change is concentrated *inside* existing files. This is the quantitative heart of the report (Section 5): for *all-in-one*, **0 net new source files**, **15 files edited**, **net +252 lines**, **16 backups**.
+
+**Listings 4–7.** Four representative in-place rewrites.
+
+*Listing 4 — baseline stub → faithful implementation* (`src/baselines/nle.py`, +27/−8):
+```python
+BEFORE (stage3 — stub delegating to bundled stack):
+  def run_baseline(dataset, config=None):
+      from src.baselines.simformer_posterior_only import _run_repo_baseline
+      overrides = dict(config or {}); overrides["mask_mode"] = "posterior"
+      return _run_repo_baseline(dataset=dataset, config=overrides)
+
+AFTER (stage8.1 — real Neural Likelihood Estimation via `sbi`):
+  def run_baseline(dataset, config=None):
+      # Paper baseline: sbi training loop, neural spline flow (NSF),
+      # batch size 1000, Adam, early stopping on validation loss.
+      seed = int((config or {}).get("seed", 0))
+      batch_size = int((config or {}).get("batch_size", 1000))
+      from src.baselines.sbi_baselines import run_sbi_nle
+      return run_sbi_nle(dataset=dataset, seed=seed, device=device,
+                         batch_size=batch_size, config=config or {})
+```
+
+*Listing 5 — configuration aligned to a paper-mandated constant* (`config.yaml`, +1/−0):
+```yaml
+BEFORE: (key absent)
+AFTER:  training_simulations: 100000  ## Section 4.2 / Figure 5 caption: 1e5 simulations
+```
+
+*Listing 6 — dataset config refactored from collection to per-task* (`configs/datasets.yaml`, +129/−53):
+```yaml
+BEFORE (stage3 — single aggregated collection):
+  sbibm_tasks:
+    kind: "task_collection"
+    prep:
+      splits: ["train", "eval"]
+      train_num_samples_per_task: 10000
+      eval_num_samples_per_task: 10
+      tasks: ["gaussian_linear", "gaussian_mixture", "two_moons", "slcp"]
+    expected_paths: ["{benchmarks_dir}/sbibm_tasks/{train,eval}.pkl"]
+
+AFTER (stage8.1 — one entry per task; split renamed eval→test; sizes raised to paper scale):
+  gaussian_linear:
+    kind: "generated"
+    simulator_task_name: "gaussian_linear"
+    prep: { splits: ["train", "test"], train_num_samples: 20000, test_num_samples: 5000 }
+    expected_paths: ["{benchmarks_dir}/gaussian_linear/{train,test}.pkl"]
+  # gaussian_mixture / two_moons / slcp defined identically …
+```
+
+*Listing 7 — a missing paper method implemented* (`src/diffusion/guidance.py`, +35/−9; self-recurrence):
+```python
+BEFORE (stage3): "self-recurrence is intentionally not implemented"
+  def __init__(self, scale_mode="sigma_inv_sq"): ...
+  additive_constraint_score = self.constraint_score(x=x, t=t, constraints=constraints)
+
+AFTER (stage8.1): optional multi-pass refinement (Lugmayr et al. 2022; paper App. A3.3)
+  def __init__(self, scale_mode="sigma_inv_sq", self_recurrence_steps=None):
+      self.self_recurrence_steps = int(self_recurrence_steps or 0)
+  ...
+  for _ in range(num_iters + 1):           # single-pass → iterative refinement
+      additive_constraint_score = self.constraint_score(x=x, t=t, constraints=constraints)
+```
+
+(Also edited in this stage: `scripts/prepare_data.py` gained download-budget tracking and an explicit `test_num_samples`; `tests/test_data_prep.py` assertions were updated to the per-task layout; `npe/npse/nre.py`, `src/data/masks.py`, `src/simulators/lotka_volterra.py`, and two `simformer_repro/` modules received smaller corrections.)
+
+### 3.5 Codebase in Docker (phases 9a, 9b, 10)
+
+**Objective.** Make the faithful codebase *gradeable and portable*.
+
+**Mechanism.** A **unit-test suite** is synthesized from the rubric in two tiers: *intermediate* tests (shapes, invariants, reported intermediate values) and *comparison* tests (the reproduced method must beat the wired baselines by the paper's stated margin), plus a hook that records each test's pass/fail score. Tests that reference a symbol the code does not actually expose are commented out and `@pytest.mark.skip`-ped rather than deleted, so a single hallucinated reference cannot break the whole run. The repository is then **packaged**, without source edits, into a self-contained container task: a `Dockerfile` baking in Python, pytest, and pinned dependencies; a task descriptor; a verifier entry script; and the repo plus its downloaded assets copied into the image.
+
+**Effect on the codebase.** **CREATE** (the `tests/` suite) followed by **PACKAGE** (the source is frozen, not modified).
+
+**Listing 8.** The repository is wrapped into a runnable container task (real artifacts under `tests/harbor/all-in-one/`).
+```
+BEFORE: a bare repository (source + tests, run by hand)
+
+AFTER: harbor task bundle
+  task.toml      # [verifier] timeout_sec = 1800; env MODEL_NAME = "claude-haiku-4-5"
+  tests/test.sh  # cd /workspace; bash solution/solve.sh
+                 # bash submission/reproduce.sh | tee reproduce.log
+                 # python /tests/paperbench_verifier.py --paper-dir … --submission-dir …
+                 #   → writes /logs/verifier/reward.txt
+  Dockerfile     # python:3.11 + pytest + pinned requirements
+  environment/   # the whole repo + assets/{benchmarks,rivals,metrics}
+```
+
+---
+
+## 4. Case study: *all-in-one*
+
+We instantiate the taxonomy on the *all-in-one* reproduction, tracing one component — the **NLE baseline** — across stages, because it exhibits the canonical lifecycle:
+
+1. **Plan (§3.1):** NLE is identified in the architecture as one of four rival baselines; no code.
+2. **Codebase (§3.2):** the method's own modules are written; baselines do not yet exist.
+3. **Dataset runner (§3.3):** `src/baselines/nle.py` is **created as a stub** delegating to the bundled Simformer stack, registered in the dispatch table, and smoke-tested (Listing 3).
+4. **Repair (§3.4):** the stub is **rewritten in place** into a faithful `sbi`-based NLE (NSF flow, batch size 1000, Adam, early stopping), per the rubric requirement (Listing 4); the backup `nle.py.100.bak` is retained.
+5. **Docker (§3.5):** a *comparison* test asserts the reproduced method outperforms NLE by the paper's margin; the repo is frozen into the container task (Listing 8).
+
+The same trajectory holds for the dataset layout (collection → per-task, Listing 6), a paper constant (Listing 5), and a missing algorithmic option (self-recurrence, Listing 7) — each *created* or *scaffolded* early and *corrected in place* at repair.
+
+---
+
+## 5. Quantitative analysis
+
+All figures below were obtained directly from the two snapshots with `diff -rq`, `find`, and `wc -l`, and are re-checkable via the commands in the file header.
+
+| Metric | Stage 3 (post-synthesis) | Stage 8.1 (post-repair) | Δ |
+|---|---:|---:|---:|
+| Source files (`.py/.yaml/.md/.sh`, excl. backups/caches) | 164 | 164 | **0** |
+| Python LOC | 51,049 | 51,223 | +174 |
+| Net source lines (all changed text files) | — | — | **+415 / −163  (net +252)** |
+| Source files edited in place | — | 15 | 15 |
+| Non-destructive backups added (`.bak`) | 0 | 16 | +16 |
+| Grading-only artifacts changed (`eval/*.json`, not code) | — | 4 | (excluded from code totals) |
+
+**Table 2.** Stage 3 → Stage 8.1 repository delta. The defining observation: **the file count does not change and no net source files are added** — the repair stage is content-rewriting, not structure-adding. (The four `eval/*.json` changes are grader outputs, not source, and are excluded from code totals.)
+
+| Edited file | + | − | Nature of change |
+|---|---:|---:|---|
+| `configs/datasets.yaml` | 129 | 53 | collection → per-task; `eval`→`test`; paper-scale sizes (Listing 6) |
+| `src/diffusion/guidance.py` | 35 | 9 | implement optional self-recurrence refinement (Listing 7) |
+| `src/baselines/nle.py` | 27 | 8 | stub → faithful `sbi` NLE (Listing 4) |
+| `src/baselines/{npe,npse,nre}.py` | (similar) | | stub → faithful `sbi` implementations |
+| `scripts/prepare_data.py` | — | — | download-budget tracking; explicit `test_num_samples` |
+| `config.yaml` | 1 | 0 | add paper-mandated `training_simulations: 100000` (Listing 5) |
+| `tests/test_data_prep.py` | — | — | assertions updated to per-task layout |
+
+**Table 3.** Per-file deltas for the most significant edits (verified). The largest change is configuration realignment, not new algorithms — consistent with the thesis that structure is set early and repair *tunes* it.
+
+**Interpretation.** Three quantitative signatures distinguish the repair stage from the creation stages: (i) zero change in file count; (ii) a small net line delta (+252) dominated by a single config refactor; and (iii) one backup per edited file. Together they confirm that, in this pipeline, *behavioral fidelity is achieved by rewriting a stable set of files*, not by regenerating the repository.
+
+---
+
+## 6. Discussion: recurring design principles
+
+Four invariants recur across stages and explain the observed behavior.
+
+- **P1 — Equation-literal synthesis (§3.2).** Equations are emitted as code with constants inlined, and their presence is verified, making the synthesized code checkable against the paper rather than merely plausible.
+- **P2 — Stub-then-implement baselines (§3.3 → §3.4).** Rivals are first wired as executable stubs behind a uniform interface, then faithfully implemented during repair. This separates *integration* (does the runner dispatch?) from *fidelity* (is the method correct?), and is visible as the `nle.py` stub→real rewrite.
+- **P3 — Grader-independent, rubric-driven repair (§3.4).** Repair is conditioned on the paper-derived rubric, not the grading harness. Fixes therefore target genuine paper requirements and generalize, instead of overfitting a held-out grader.
+- **P4 — Non-destructive editing (§3.4, §3.5).** Repairs rewrite in place with numbered backups, and hallucinated test references are skipped rather than deleted. The pipeline never loses prior work, which is what keeps the file count flat in Table 2.
+
+---
+
+## 7. Limitations
+
+This is a single-reproduction case study; the absolute numbers (e.g. +252 lines) are specific to *all-in-one* and will vary with paper complexity. The two snapshots cleanly capture the **synthesis → repair** transition; the *Plan* and *Docker* stages are not represented as distinct repository snapshots, so their listings (1 and 8) are drawn from the planning artifacts and the real container bundle respectively rather than from a paired diff. Finally, we characterize *structural and textual* change; we do not measure the *semantic correctness* gain from repair, which is the province of the grader and the synthesized test suite.
+
+---
+
+## 8. Conclusion
+
+We characterized how an automated reproduction pipeline transforms a codebase, stage by stage, and grounded the characterization in verified snapshots of a real reproduction. The repository's structure is established early — by synthesis and runner integration — and the later repair stage is, quantitatively, a *content rewrite over a stable file set* (164 → 164 files; net +252 lines across 15 files; 16 backups). Side artifacts (evaluation plan, rubric, tests, container task) are the connective tissue that conditions each mutation. The four design principles — equation-literal synthesis, stub-then-implement baselines, grader-independent repair, and non-destructive editing — together account for both the *correctness* trajectory and the *structural stability* we observe.
+
+---
+
+### Appendix A. Reproducing every claim
+
+```bash
+S3=outputs/paperbench_subrepos/all-in-one/stage3_11
+S81=outputs/paperbench_subrepos/all-in-one/stage8.1_11
+
+# Table 2 — file count, LOC, changed-file inventory
+find $S3 -type f \( -name '*.py' -o -name '*.yaml' -o -name '*.md' -o -name '*.sh' \) \
+     ! -name '*.bak' ! -path '*__pycache__*' | wc -l
+diff -rq $S3 $S81 | grep '^Files' | grep -v '\.bak' | grep -v '/eval/'   # the 15 edited source files
+
+# Table 3 / Listings 4-7 — per-file before/after
+diff -u $S3/src/baselines/nle.py     $S81/src/baselines/nle.py
+diff -u $S3/config.yaml              $S81/config.yaml
+diff -u $S3/configs/datasets.yaml    $S81/configs/datasets.yaml
+diff -u $S3/src/diffusion/guidance.py $S81/src/diffusion/guidance.py
+
+# Listing 8 — the container task bundle
+ls tests/harbor/all-in-one/  &&  sed -n '1,40p' tests/harbor/all-in-one/tests/test.sh
+```
