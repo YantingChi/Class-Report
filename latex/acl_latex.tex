@@ -223,7 +223,7 @@ arbitrary unit tests.
 % ---------------------------------------------------------------
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=0.95\textwidth]{WorkFlowv2.png}
+  \includegraphics[width=0.95\textwidth]{Fig/WorkFlowv2.png}
   \caption{Overview of the Paper2Repro workflow as a stage-wise
   codebase transformation. From the input paper $R$, two paths
   proceed and later converge. The \textbf{build path}
@@ -553,7 +553,7 @@ run-and-fix loop is intended to address.
 % ---------------------------------------------------------------
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=0.9\textwidth]{pipeline_scores.png}
+  \includegraphics[width=0.9\textwidth]{Fig/pipeline_scores.png}
   \caption{Reproduction score by pipeline stage for three papers
   (\emph{bridging-data-gaps}, \emph{stochastic-interpolants},
   \emph{all-in-one}). The four bars per paper follow the build path
@@ -615,64 +615,6 @@ the adaptor and CDC baselines it is supposed to add. The practical
 takeaway is to trust the multi-run stability of a stage rather than an
 isolated single-run dip.
 
-\subsection{Case Study: The Code Quality of BE-CBO Repo }
-
-BE-CBO is a useful case study because its acquisition function
-and constraint-handling logic admit crisp, paper-specific
-intermediate checks. Table~\ref{tab:becbo_impl_diff} compares
-the components implemented in the paper's reference code
-(BE-CBO-std), in the Paper2Code-only output (P2C), and in our
-framework's output (P2R), on five components that
-intermediate-value tests directly verify.
-
-\begin{table*}[t]
-\centering
-\small
-\begin{tabular}{p{0.18\linewidth}p{0.25\linewidth}p{0.24\linewidth}p{0.23\linewidth}}
-\toprule
-\textbf{Component} & \textbf{BE-CBO-std (paper)} & \textbf{P2C} & \textbf{P2R (ours)} \\
-\midrule
-Constraint classifier
-& Variational probabilistic Deep Ensemble
-& Plain neural ensemble; hand-crafted probit loss
-& Variational probabilistic Deep Ensemble \\
-Classifier training
-& Retrain at each fit
-& Continue training across BO iterations
-& Reinitialize before each refit \\
-Objective surrogate
-& Explicit GP with stated modeling choices
-& Default GP wrapper
-& Explicit GP with stated modeling choices \\
-Feasibility bound
-& Uncertainty-aware bound
-& Approximate $p+\sigma\geq 0.5$
-& Uncertainty-aware bound \\
-Acquisition optimization
-& BoTorch constrained acquisition
-& Manual Sobol + Adam + SLSQP
-& BoTorch \texttt{optimize\_acqf} with Sobol restarts \\
-\bottomrule
-\end{tabular}
-\caption{BE-CBO implementation differences. P2R recovers the
-paper's specified components on every row where P2C diverges;
-the rubric agent generates intermediate-value tests that pin
-each choice down, and the amelioration loop produces patches
-that satisfy them.}
-\label{tab:becbo_impl_diff}
-\end{table*}
-
-Across all five rows, P2C diverges from the paper in ways that
-are visible to a careful reader but not to an LLM-as-a-judge: it
-substitutes a plain neural ensemble for a variational
-probabilistic ensemble, replaces the BoTorch constrained
-acquisition with a hand-rolled Sobol+Adam+SLSQP loop, and
-continues training the constraint classifier across BO
-iterations rather than retraining at each fit. P2R recovers the
-paper's specified components on every row, because the rubric
-agent generates intermediate-value tests that pin the relevant
-choices in place, and the amelioration loop produces patches
-that satisfy them.
 
 \subsection{Per-Paper Score Distribution}
 
