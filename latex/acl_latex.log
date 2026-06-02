@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.5.22)  22 MAY 2026 00:14
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2026.5.22)  1 JUN 2026 22:36
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -595,143 +595,210 @@ Underfull \hbox (badness 2401) in paragraph at lines 165--178
  []
 
 [2]
-<..//Fig/workflow.png, id=159, 545.3976pt x 672.3519pt>
-File: ..//Fig/workflow.png Graphic file (type png)
-<use ..//Fig/workflow.png>
-Package pdftex.def Info: ..//Fig/workflow.png  used on input line 226.
-(pdftex.def)             Requested size: 432.48051pt x 533.163pt.
+<..//WorkFlowv2.png, id=180, 1387.1825pt x 725.71124pt>
+File: ..//WorkFlowv2.png Graphic file (type png)
+<use ..//WorkFlowv2.png>
+Package pdftex.def Info: ..//WorkFlowv2.png  used on input line 226.
+(pdftex.def)             Requested size: 432.48051pt x 226.25267pt.
+ [3]
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
-Underfull \hbox (badness 10000) in paragraph at lines 286--287
-[]\T1/ptm/b/n/10.95 (+20) Dependency-aware cod-ing. \T1/ptm/m/n/10.95 (+20) Fil
-es
+ [4 <..//WorkFlowv2.png>]
+Underfull \hbox (badness 1852) in paragraph at lines 306--307
+[]\T1/ptm/m/n/10.95 (+20) A planned \T1/ptm/m/it/10.95 (+20) run-time evaluatio
+n-and-fix \T1/ptm/m/n/10.95 (+20) loop
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 286--287
-\T1/ptm/m/n/10.95 (+20) are gen-er-ated in de-pen-dency or-der, with
- []
-
-[3]
-Overfull \hbox (10.17503pt too wide) detected at line 297
-\OMS/cmsy/m/n/10.95 M[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 R;  S\OT1/cmr/m/
-n/10.95 ) := [](\OMS/cmsy/m/n/10.95 T[]\OT1/cmr/m/n/10.95 (\OML/cmm/m/it/10.95 
-R;  S\OT1/cmr/m/n/10.95 )) \OMS/cmsy/m/n/10.95 ! \OML/cmm/m/it/10.95 U \OT1/cmr
-/m/n/10.95 = (\OML/cmm/m/it/10.95 Q;  V\OT1/cmr/m/n/10.95 )\OML/cmm/m/it/10.95 
-;
+Underfull \hbox (badness 1661) in paragraph at lines 306--307
+\T1/ptm/m/n/10.95 (+20) reads \T1/pcr/m/n/10.95 scores/scores.json\T1/ptm/m/n/1
+0.95 (+20) , feeds fail-ing
  []
 
 
-Underfull \hbox (badness 2012) in paragraph at lines 302--303
-[]\T1/ptm/b/n/10.95 (+20) Final-comparison tests. \T1/ptm/m/n/10.95 (+20) These
- tests run
+Underfull \hbox (badness 10000) in paragraph at lines 314--315
+[]\T1/ptm/m/n/10.95 (+20) Equations are
  []
 
 
-Underfull \hbox (badness 1874) in paragraph at lines 302--303
-\T1/ptm/m/n/10.95 (+20) benchmark-level checks: does the gen-er-ated
+Overfull \hbox (3.33424pt too wide) in paragraph at lines 316--317
+[]
  []
 
 
-Underfull \hbox (badness 1019) in paragraph at lines 320--321
-\T1/ptm/m/n/10.95 (+20) base-lines; (4) run \T1/pcr/m/n/10.95 reproduce.sh\T1/p
-tm/m/n/10.95 (+20) ; (5) ex-e-
+Underfull \hbox (badness 1102) in paragraph at lines 316--317
+\T1/ptm/m/n/10.95 (+20) Repair is con-di-tioned on the paper-derived
  []
 
-[4]
-Underfull \hbox (badness 1430) in paragraph at lines 374--377
-\T1/ptm/m/n/9 (+20) al-go-rithms; weak on ex-e-cuted ex-
+
+Underfull \hbox (badness 1635) in paragraph at lines 316--317
+\T1/ptm/m/n/10.95 (+20) gen-uine pa-per re-quire-ments and gen-er-al-ize
  []
 
 [5]
-Underfull \hbox (badness 10000) in paragraph at lines 443--465
+Underfull \hbox (badness 1430) in paragraph at lines 372--375
+\T1/ptm/m/n/9 (+20) al-go-rithms; weak on ex-e-cuted ex-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 441--463
  []\T1/ptm/b/n/10.95 (+20) BBOX-ADAPTER.[] \T1/ptm/m/n/10.95 (+20) The BBOX-ADA
 PTER
  []
 
 
-Underfull \hbox (badness 6445) in paragraph at lines 443--465
+Underfull \hbox (badness 6445) in paragraph at lines 441--463
 \T1/ptm/m/n/10.95 (+20) repos-i-tory con-tains a sub-stan-tial adap-ta-tion
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 443--465
+Underfull \hbox (badness 10000) in paragraph at lines 441--463
 \T1/ptm/m/n/10.95 (+20) ranking/NCE-style adapter train-ing, on-line
  []
 
 
-Underfull \hbox (badness 2012) in paragraph at lines 443--465
+Underfull \hbox (badness 2012) in paragraph at lines 441--463
 \T1/ptm/m/n/10.95 (+20) pos-i-tive/neg-a-tive ex-am-ple stor-age, single-step
  []
 
 
-Underfull \hbox (badness 1629) in paragraph at lines 443--465
+Underfull \hbox (badness 1629) in paragraph at lines 441--463
 \T1/ptm/m/n/10.95 (+20) af-fect-ing \T1/pcr/m/n/10.95 RankingNCELoss.forward\T1
 /ptm/m/n/10.95 (+20) ; and
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 484--489
+[6]
+Underfull \hbox (badness 10000) in paragraph at lines 482--487
 \T1/ptm/m/n/10.95 (+20) Table [][]2[][] com-pares Pa-per2Code (our re-
  []
 
-[6]
-Underfull \vbox (badness 10000) has occurred while \output is active []
+[7]
+<..//pipeline_scores.png, id=231, 714.9912pt x 422.0568pt>
+File: ..//pipeline_scores.png Graphic file (type png)
+<use ..//pipeline_scores.png>
+Package pdftex.def Info: ..//pipeline_scores.png  used on input line 556.
+(pdftex.def)             Requested size: 409.71692pt x 241.85643pt.
+
+Underfull \hbox (badness 3323) in paragraph at lines 603--617
+\T1/ptm/m/n/10.95 (+20) The Iteratively-Fixed Code-base stage is the
+ []
 
 
-Underfull \hbox (badness 1708) in paragraph at lines 579--580
+Underfull \hbox (badness 1817) in paragraph at lines 603--617
+\T1/ptm/m/n/10.95 (+20) ($\OT1/cmr/m/n/10.95 3[]3$\T1/ptm/m/n/10.95 (+20) ) gai
+ns in all three papers---for in-stance
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 603--617
+\T1/pcr/m/n/10.95 random_fourier_features=False
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 603--617
+\T1/ptm/m/n/10.95 (+20) in \T1/ptm/m/it/10.95 (+20) stochastic-interpolants\T1/
+ptm/m/n/10.95 (+20) , the gradient-of-
+ []
+
+
+Underfull \hbox (badness 2635) in paragraph at lines 603--617
+\T1/ptm/m/n/10.95 (+20) output-layer and $\OT1/cmr/m/n/10.95 10$\T1/ptm/m/n/10.
+95 (+20) -shot gen-er-a-tion code in
+ []
+
+[8]
+Underfull \hbox (badness 1708) in paragraph at lines 651--652
 []\T1/ptm/m/n/9 (+20) Acquisition op-ti-miza-
  []
 
 
-Underfull \hbox (badness 4531) in paragraph at lines 581--582
+Underfull \hbox (badness 4531) in paragraph at lines 653--654
 []\T1/ptm/m/n/9 (+20) Manual Sobol + Adam +
  []
 
 
-Overfull \hbox (2.47278pt too wide) in paragraph at lines 559--589
+Overfull \hbox (2.47278pt too wide) in paragraph at lines 631--661
  [][] 
  []
 
-<..//Fig/reproduction_score_estimates_72.png, id=204, 786.2976pt x 642.2394pt>
+<..//Fig/reproduction_score_estimates_72.png, id=246, 786.2976pt x 642.2394pt>
 File: ..//Fig/reproduction_score_estimates_72.png Graphic file (type png)
 <use ..//Fig/reproduction_score_estimates_72.png>
 Package pdftex.def Info: ..//Fig/reproduction_score_estimates_72.png  used on i
-nput line 613.
+nput line 685.
 (pdftex.def)             Requested size: 386.96027pt x 316.06223pt.
-<..//Fig/reproduction_score_estimates.png, id=205, 786.2976pt x 642.2394pt>
+<..//Fig/reproduction_score_estimates.png, id=247, 786.2976pt x 642.2394pt>
 File: ..//Fig/reproduction_score_estimates.png Graphic file (type png)
 <use ..//Fig/reproduction_score_estimates.png>
 Package pdftex.def Info: ..//Fig/reproduction_score_estimates.png  used on inpu
-t line 622.
+t line 694.
 (pdftex.def)             Requested size: 386.96027pt x 316.06223pt.
 
-Underfull \hbox (badness 2103) in paragraph at lines 642--653
+Underfull \hbox (badness 2103) in paragraph at lines 714--725
  []\T1/ptm/b/n/10.95 (+20) Reproduction scores[] \T1/ptm/m/n/10.95 (+20) fall i
 n a sub-stan-tially
  []
 
 
-Underfull \hbox (badness 3635) in paragraph at lines 642--653
+Underfull \hbox (badness 3635) in paragraph at lines 714--725
 \T1/ptm/m/n/10.95 (+20) lower range, with a mean of 16.2% (Fig-
  []
 
 
-Overfull \hbox (66.63556pt too wide) in paragraph at lines 642--653
+Overfull \hbox (66.63556pt too wide) in paragraph at lines 714--725
 \T1/ptm/m/n/10.95 (-20) (\T1/pcr/m/n/10.95 stay-on-topic-with-classifier-free-g
 uidance
  []
 
 
-Underfull \hbox (badness 1742) in paragraph at lines 642--653
+Underfull \hbox (badness 1742) in paragraph at lines 714--725
 \T1/ptm/m/n/10.95 (+20) (mostly 20--22%) con-firm the component-vs.-
  []
 
 
-Underfull \hbox (badness 1052) in paragraph at lines 642--653
+Underfull \hbox (badness 1052) in paragraph at lines 714--725
 \T1/ptm/m/n/10.95 (+20) benchmark gap. T1 pa-pers, which com-bine
  []
 
-[7] [8] (./acl_latex.bbl
+[9 <..//pipeline_scores.png>]
+Underfull \hbox (badness 1087) in paragraph at lines 773--773
+\T1/ptm/m/n/10 (+20) di-tional DDPM (frozen)'' is the pre-trained model
+ []
+
+
+Underfull \hbox (badness 2503) in paragraph at lines 773--773
+\T1/ptm/m/n/10 (+20) with no adaptation---the hon-est ``be-fore'' an-chor;
+ []
+
+
+Overfull \hbox (1.66571pt too wide) in paragraph at lines 789--814
+\T1/pcr/m/n/10.95 train_classifier $\OMS/cmsy/m/n/10.95 !$ \T1/pcr/m/n/10.95 tr
+ain_ant $\OMS/cmsy/m/n/10.95 !$ \T1/pcr/m/n/10.95 eval
+ []
+
+
+Underfull \hbox (badness 4726) in paragraph at lines 789--814
+\T1/ptm/m/n/10.95 (+20) bug: the repo's own \T1/pcr/m/n/10.95 AdapterInjector
+ []
+
+
+Underfull \hbox (badness 4556) in paragraph at lines 789--814
+\T1/ptm/m/n/10.95 (+20) at a $\OT1/cmr/m/n/10.95 128$\T1/ptm/m/n/10.95 (+20) -c
+hannel/$\OT1/cmr/m/n/10.95 256$\T1/ptm/m/n/10.95 (+20) px po-si-tion, rais-ing 
+a
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 789--814
+\T1/pcr/m/n/10.95 DiffusionModelWrapper.predict_eps\T1/ptm/m/n/10.95 (+20) ,
+ []
+
+
+Underfull \vbox (badness 3179) has occurred while \output is active []
+
+ [10]
+[11 <..//Fig/reproduction_score_estimates_72.png>] [12 <..//Fig/reproduction_sc
+ore_estimates.png>] (./acl_latex.bbl
 Underfull \hbox (badness 1052) in paragraph at lines 57--64
 []\T1/ptm/m/n/10 (+20) Joelle Pineau, Philippe Vincent-Lamarre, Kous-tuv
  []
@@ -752,63 +819,121 @@ Underfull \hbox (badness 1052) in paragraph at lines 107--113
 \T1/ptm/m/n/10 (+20) Evan Mays, Ben-jamin Kin-sella, Wy-att Thomp-
  []
 
-[9])
-<..//Fig/category_counts_xfail_as_fail.png, id=287, 939.51pt x 542.025pt>
+) [13]
+Underfull \hbox (badness 10000) in paragraph at lines 989--990
+[]\T1/ptm/m/n/9 (+20) collection
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 989--990
+\OMS/cmsy/m/n/9 !$ \T1/ptm/m/n/9 (+20) per-task;
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 989--990
+\T1/pcr/m/n/9 eval$\OMS/cmsy/m/n/9 !$\T1/pcr/m/n/9 test\T1/ptm/m/n/9 (+20) ;
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 990--991
+[]\T1/ptm/m/n/9 (+20) implement
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 990--991
+\T1/ptm/m/n/9 (+20) op-tional self-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 990--991
+\T1/ptm/m/n/9 (+20) recurrence
+ []
+
+
+Underfull \hbox (badness 4686) in paragraph at lines 991--992
+[]\T1/ptm/m/n/9 (+20) stub $\OMS/cmsy/m/n/9 !$ \T1/ptm/m/n/9 (+20) faith-ful
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 992--993
+[]\T1/ptm/m/n/9 (+20) add paper-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 992--993
+\T1/ptm/m/n/9 (+20) mandated
+ []
+
+
+Overfull \hbox (42.27338pt too wide) in paragraph at lines 992--993
+\T1/pcr/m/n/9 training_simulations| 
+ []
+
+
+Overfull \hbox (52.14026pt too wide) in paragraph at lines 985--997
+ [][] 
+ []
+
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
+File: lstlang1.sty 2020/03/24 1.8d listings language file
+)
+Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
+nput line 1007.
+LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <9> not available
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 1008.
+ [14]
+<..//Fig/category_counts_xfail_as_fail.png, id=397, 939.51pt x 542.025pt>
 File: ..//Fig/category_counts_xfail_as_fail.png Graphic file (type png)
 <use ..//Fig/category_counts_xfail_as_fail.png>
 Package pdftex.def Info: ..//Fig/category_counts_xfail_as_fail.png  used on inp
-ut line 778.
+ut line 1057.
 (pdftex.def)             Requested size: 418.82375pt x 241.6263pt.
- (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
-File: lstlang1.sty 2020/03/24 1.8d listings language file
-)
-Underfull \hbox (badness 4132) in paragraph at lines 818--820
+
+Underfull \hbox (badness 4132) in paragraph at lines 1097--1099
  []\T1/ptm/b/n/10.95 (+20) Core method im-ple-men-ta-tion.[] \T1/ptm/m/n/10.95 
 (+20) This BBox
  []
 
 
-Underfull \hbox (badness 1033) in paragraph at lines 892--896
+Underfull \hbox (badness 1033) in paragraph at lines 1171--1175
  []\T1/ptm/b/n/10.95 (+20) Result re-pro-duc-tion and com-par-i-son.[] \T1/ptm/
 m/n/10.95 (+20) This
  []
 
-[10] [11
+[15] [16
 
-] [12 <..//Fig/workflow.png>] [13 <..//Fig/reproduction_score_estimates_72.png>
-] [14 <..//Fig/reproduction_score_estimates.png> <..//Fig/category_counts_xfail
-_as_fail.png>] (./acl_latex.aux)
+ <..//Fig/category_counts_xfail_as_fail.png>] (./acl_latex.aux)
 Package rerunfilecheck Info: File `acl_latex.out' has not changed.
-(rerunfilecheck)             Checksum: A1D79A18B7C7A1D66C3402C48C3B34BD;2833.
+(rerunfilecheck)             Checksum: 59CCFB8B8236989236591782A84E48F8;3611.
  ) 
 Here is how much of TeX's memory you used:
- 17046 strings out of 479654
- 267111 string characters out of 5883416
- 1166354 words of memory out of 5000000
- 34353 multiletter control sequences out of 15000+600000
- 534037 words of font info for 348 fonts, out of 8000000 for 9000
+ 17248 strings out of 479654
+ 269599 string characters out of 5883416
+ 1208245 words of memory out of 5000000
+ 34420 multiletter control sequences out of 15000+600000
+ 542349 words of font info for 404 fonts, out of 8000000 for 9000
  309 hyphenation exceptions out of 8191
- 75i,11n,77p,1155b,1648s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 75i,11n,77p,1453b,1967s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texm
-f-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/
-fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/t
-ype1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10
-.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></
-usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb></usr/share/texlive/texmf-dis
-t/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1
-/urw/helvetic/uhvb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/u
-tmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr
-/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on acl_latex.pdf (14 pages, 989213 bytes).
+f-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/t
+ype1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8
+.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></
+usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb></usr/share/tex
+live/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texlive/texmf-di
+st/fonts/type1/urw/courier/ucrro8a.pfb></usr/share/texlive/texmf-dist/fonts/typ
+e1/urw/helvetic/uhvb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times
+/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></
+usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on acl_latex.pdf (16 pages, 892973 bytes).
 PDF statistics:
- 525 PDF objects out of 1000 (max. 8388607)
- 462 compressed objects within 5 object streams
- 162 named destinations out of 1000 (max. 500000)
- 57509 words of extra memory for PDF output out of 61914 (max. 10000000)
+ 624 PDF objects out of 1000 (max. 8388607)
+ 555 compressed objects within 6 object streams
+ 211 named destinations out of 1000 (max. 500000)
+ 62162 words of extra memory for PDF output out of 74296 (max. 10000000)
 
